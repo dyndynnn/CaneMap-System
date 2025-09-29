@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Field - CaneMap</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <style>
+        .map-container {
+            height: 400px;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .field-popup {
+            min-width: 200px;
+        }
+        
+        .field-popup h4 {
+            margin-bottom: 8px;
+        }
+        
+        .field-popup p {
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <a href="../Common/lobby.html" class="text-gray-400 hover:text-gray-600 mr-4">
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900">Join a Field</h1>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Message Container -->
+        <div id="message-container"></div>
+
+        <!-- Available Fields -->
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Available Fields</h2>
+            <div id="available-fields">
+                <!-- Loading state -->
+                <div class="bg-white rounded-lg shadow-sm border p-8 text-center">
+                    <div class="text-gray-400 mb-4">
+                        <i data-lucide="loader-2" class="w-12 h-12 mx-auto animate-spin"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Loading Fields...</h3>
+                    <p class="text-gray-600">Please wait while we fetch available fields.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Requests -->
+        <div id="pending-requests" class="mt-8" style="display: none;">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">My Join Requests</h2>
+            <!-- Content will be populated by JavaScript -->
+        </div>
+
+        <!-- Map View -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Field Locations</h2>
+            <div class="bg-white rounded-lg shadow-sm border">
+                <div class="p-6">
+                    <div id="fieldsMap" class="map-container"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Firebase Scripts -->
+    <script type="module" src="../backend/Common/firebase-config.js"></script>
+    <script type="module" src="../backend/Handler/join-field.js"></script>
+</body>
+</html>
