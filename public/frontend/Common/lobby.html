@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaneMap - Agricultural Decision Support Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+     <!-- Lottie Animation -->
+     <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.6.2/dist/dotlottie-wc.js" type="module"></script>
+    <style>
+        .swiper {
+            width: 100%;
+            padding: 50px 0;
+        }
+        .feature-card {
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+			/* Green-tinted header shadow */
+			.shadow-green-md {
+				box-shadow: 0 4px 14px rgba(94, 165, 0, 0.35);
+        }
+        
+        /* Scroll animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in-up.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .fade-in-left {
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in-left.animate {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .fade-in-right {
+            opacity: 0;
+            transform: translateX(30px);
+            transition: all 0.6s ease;
+        }
+        
+        .fade-in-right.animate {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .scale-in {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.6s ease;
+        }
+        
+        .scale-in.animate {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .slide-in-bottom {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+        
+        .slide-in-bottom.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Weather Now card (glassy dark style) */
+        .weather-card {
+            position: relative;
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(15,23,15,0.55), rgba(15,23,15,0.35));
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            overflow: hidden;
+        }
+        .weather-card::before {
+            content: "";
+            position: absolute; inset: 0;
+            background: var(--wx-bg-image, url('../img/Weather.jpg')) center/cover no-repeat;
+            opacity: 0.25;
+            filter: grayscale(40%);
+        }
+        .weather-card::after {
+            content: "";
+            position: absolute; inset: 0;
+            background: radial-gradient(1200px 400px at 20% -10%, rgba(255,255,255,0.18), transparent 60%),
+                        radial-gradient(1000px 400px at 110% 110%, rgba(124,207,0,0.12), transparent 60%);
+            pointer-events: none;
+        }
+        /* Dynamic weather background helpers (set your own image paths if available) */
+        .wx-bg-rain { --wx-bg-image: url('../img/rain.jpg'); }
+        .wx-bg-sun { --wx-bg-image: url('../img/sunny.jpg'); }
+        .wx-bg-storm { --wx-bg-image: url('../img/lightning.jpg'); }
+        .wx-bg-cloudy { --wx-bg-image: url('../img/Weather.jpg'); }
+        .glass {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+        }
+        .wx-mini-bar { width: 6px; border-radius: 9999px; background: rgba(255,255,255,0.45); }
+        .wx-mini-bar.highlight { background: linear-gradient(180deg, #fff, rgba(255,255,255,0.6)); }
+        .wx-day-list { display: flex; flex-direction: column; gap: 8px; }
+        .wx-day { display: grid; grid-template-columns: 56px 1fr 56px; align-items: center; gap: 8px; }
+        .wx-day .name { font-weight: 700; font-size: 12px; color: rgba(255,255,255,0.9); }
+        .wx-day .temp { font-weight: 700; font-size: 12px; text-align: right; color: rgba(255,255,255,0.95); }
+        .wx-pill { border-radius: 9999px; padding: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
+        
+        /* Carousel Navigation Styles */
+        .nav-line {
+            width: 0; /* will be set dynamically to span 3 cards */
+            height: 4px; /* Thicker line */
+            background: rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            border-radius: 9999px; /* fully rounded ends */
+        }
+        
+        .progress {
+            width: 16.67%; /* Start at first slide (1/6) */
+            min-width: 16px; /* ensure visible at small values */
+            height: 100%;
+            background: #f9b300; /* Yellow color */
+            transition: width 0.5s ease;
+            border-radius: 9999px; /* fully rounded ends */
+        }
+        
+        .slide-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin-left: 20px; /* Better spacing from the line */
+        }
+		/* Remove Swiper's default blue arrows */
+		.swiper-button-prev::after,
+		.swiper-button-next::after { content: none !important; }
+        /* Make feature cards obviously clickable */
+        .featuresSwiper .swiper-slide { cursor: pointer; }
+        /* Contact top wave divider */
+        .custom-shape-divider-top-1755503018 {
+            position: absolute;
+            top: -6px; /* overlap more to hide any seam */
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            transform: rotate(180deg);
+            pointer-events: none;
+        }
+
+        .custom-shape-divider-top-1755503018 svg {
+            position: relative;
+            display: block;
+            width: calc(160% + 2px);
+            height: 160px;
+        }
+
+        .custom-shape-divider-top-1755503018 .shape-fill {
+            /* darker cane green with higher opacity */
+            fill: rgba(124, 207, 0, 0.9);
+        }
+        /* remove overlay to avoid white band */
+        #contact::before { content: none; }
+        /* About bottom wave divider */
+        .custom-shape-divider-bottom-1755503533 {
+            position: absolute;
+            bottom: -50px; /* overlap further to ensure smooth edge */
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .custom-shape-divider-bottom-1755503533 svg {
+            position: relative;
+            display: block;
+            width: calc(165% + 2px);
+            height: 180px;
+        }
+
+        .custom-shape-divider-bottom-1755503533 .shape-fill {
+            fill: rgba(124, 207, 0, 0.9);
+        }
+        /* ensure about content sits above the wave */
+        .about-content { position: relative; z-index: 1; }
+        /* Driver badge micro-animations */
+        @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+        .reveal-up { opacity: 0; transform: translateY(16px); animation: rise .7s ease-out .1s forwards; }
+        @keyframes floatY { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-8px);} }
+        .float-slow { animation: floatY 6s ease-in-out infinite; }
+        @keyframes shine { from { transform: translateX(-100%);} to { transform: translateX(100%);} }
+        .shine::before { content:""; position:absolute; inset:0; background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.18) 50%, transparent 100%); transform: translateX(-100%); animation: shine 5s linear infinite; }
+        .blob {
+          position:absolute; border-radius:9999px; filter: blur(40px); opacity:.35; pointer-events:none;
+        }
+        .blob-emerald { background: radial-gradient(closest-side, rgba(16,185,129,.45), transparent 70%); }
+        .blob-lime { background: radial-gradient(closest-side, rgba(132,204,22,.45), transparent 70%); }
+        /* ========== Responsive Header & Map Section ========== */
+
+/* Header responsiveness */
+@media (max-width: 1024px) {
+  header nav .flex-1 {
+    display: none;
+  }
+  header nav .flex.items-center.justify-between {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  header h1 {
+    font-size: 1.5rem;
+  }
+  #btnRegisterField {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+
+@media (max-width: 768px) {
+  header nav {
+    padding: 0.75rem;
+  }
+  header h1 {
+    font-size: 1.25rem;
+  }
+  #profileDropdownBtn span {
+    display: none; 
+  }
+  #btnRegisterField {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* For large screens: tighter header edges */
+@media (min-width: 1024px) {
+  header nav {
+    max-width: 100% !important;
+    margin-left: -7rem !important;
+    margin-right: -5rem !important;
+    padding-left: -7rem !important;   /* 16px space left */
+    padding-right: -5rem !important;  /* 16px space right */
+  }
+}
+
+
+@media (max-width: 768px) {
+  #mapPanel .flex.justify-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  #mapPanel h2 {
+    font-size: 1.25rem;
+  }
+  #mapSearchInput {
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+  }
+  #mapSearchBtn,
+  #expandMapBtn {
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+  #mapPanel .flex.items-center.gap-3 {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1rem;
+  }
+  #mapPanel h2 {
+    font-size: 1rem;
+  }
+  #mapSearchInput {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+  }
+  #mapSearchBtn,
+  #expandMapBtn {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+}
+
+header nav .flex.items-center.justify-between {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem; 
+}
+
+header nav .flex.items-center.justify-between > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; 
+}
+
+#btnRegisterField {
+  margin-left: 0.5rem;
+}
+
+header nav .flex.items-center.justify-between > .relative {
+  margin-left: auto; 
+  padding-right: 1px;  
+}
+</style>
+</head>
+    <body class="bg-[#F5F5F0] min-h-screen antialiased">
+    <style>
+        :root {
+            --cane-50: #f7fee7;
+            --cane-100: #ecfcca;
+            --cane-200: #d8f999;
+            --cane-300: #bbf451;
+            --cane-400: #9ae600;
+            --cane-500: #7ccf00;
+            --cane-600: #5ea500;
+            --cane-700: #497d00;
+            --cane-800: #3c6300;
+            --cane-900: #35530e;
+            --cane-950: #192e03;
+        }
+    </style>
+    <!-- Small green header bar -->
+    <div class="w-full h-2 bg-[#F5F5F0]"></div>
+    <!-- Header/Navigation -->
+	<header class="bg-gradient-to-r from-[var(--cane-800)] to-[var(--cane-700)] sticky top-0 z-50">
+        <nav class="w-full px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                     <h1 class="text-2xl font-extrabold text-white cursor-pointer transition-all duration-300" onclick="scrollToTop()">CaneMap</h1>
+                </div>
+                <div class="flex-1 flex justify-center">
+                     <div class="flex space-x-10"> <!-- Navigation menu centered -->
+                          <a href="#features" class="text-white hover:text-[var(--cane-100)] hover:underline underline-offset-4 decoration-[var(--cane-300)] transition-colors text-lg font-semibold">Features</a>
+                          <a href="#about" class="text-white hover:text-[var(--cane-100)] hover:underline underline-offset-4 decoration-[var(--cane-300)] transition-colors text-lg font-semibold">About us</a>
+                          <a href="#driver-badge" class="text-white hover:text-[var(--cane-100)] hover:underline underline-offset-4 decoration-[var(--cane-300)] transition-colors text-lg font-semibold">Driver Badge</a>
+                          <a href="#contact" class="text-white hover:text-[var(--cane-100)] hover:underline underline-offset-4 decoration-[var(--cane-300)] transition-colors text-lg font-semibold">Contact</a>
+                    </div>
+                </div>
+                                
+                     <button id="btnRegisterField" class="bg-white text-[var(--cane-800)] px-4 py-2 rounded-lg hover:bg-[var(--cane-50)] transition-all duration-300 transform hover:scale-105 shadow-md font-semibold" onclick="window.location.href='../Handler/Register-field.html'">
+                         + Register a Field
+                     </button>
+                     <!-- Profile Dropdown -->
+                     <div class="relative">
+                         <button id="profileDropdownBtn" class="flex items-center space-x-2 text-white hover:text-[var(--cane-100)] transition-all duration-300">
+                             <div class="w-8 h-8 bg-gradient-to-br from-[var(--cane-400)] to-[var(--cane-500)] rounded-full flex items-center justify-center shadow-md ml-1">
+                                 <i class="fas fa-user text-white text-sm"></i>
+                             </div>
+                             <span class="font-semibold" id="userName">Farmer Name</span>
+                             <i class="fas fa-chevron-down text-white/80 text-xs transition-transform duration-300" id="dropdownArrow"></i>
+                         </button>
+                         
+                         <!-- Dropdown Menu -->
+                         <div id="profileDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-[var(--cane-200)] opacity-0 invisible transition-all duration-300 transform scale-95 origin-top-right z-50">
+                             <div class="py-2">
+                                 <div class="px-4 py-3 border-b border-[var(--cane-100)]">
+                                     <p class="text-sm font-semibold text-[var(--cane-950)]" id="dropdownUserName">Farmer Name</p>
+                                     <p class="text-xs text-[var(--cane-700)] font-medium">Farmer</p>
+                                 </div>
+                                 <a id="dashboardLink" href="javascript:void(0)" class="flex items-center px-4 py-2 text-sm text-[var(--cane-800)] hover:bg-[var(--cane-50)] transition-colors font-medium opacity-60 cursor-not-allowed">
+                                     <i class="fas fa-tachometer-alt mr-3 text-[var(--cane-500)]"></i>
+                                     Dashboard
+                                 </a>
+                                 <div class="border-t border-[var(--cane-100)] mt-2">
+                                    <a id="logoutBtn" href="#" class="flex items-center px-4 py-2 text-sm text-[var(--cane-800)] hover:bg-[var(--cane-50)] transition-colors font-medium">
+                                         <i class="fas fa-cog mr-3 text-[var(--cane-500)]"></i>
+                                         Settings
+                                     </a>
+                                    <a id="logoutLink" href="#" class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                         <i class="fas fa-sign-out-alt mr-3"></i>
+                                         Logout
+                                     </a>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="w-full min-h-screen py-4 px-2 mt-8 bg-[#F5F5F0] relative overflow-hidden">
+    <div id="mainContent" class="w-full px-4 pb-8 flex flex-col lg:flex-row gap-8">
+            <!-- Left Panel - Sugarcane Field Map -->
+            <div id="mapPanel" class="flex-1 fade-in-left">
+                                                  <div class="flex justify-between items-center mb-4">
+                     <h2 class="text-2xl font-extrabold text-[var(--cane-950)]">Sugarcane Field Map</h2>
+                     <div class="flex items-center gap-3 ml-auto">
+                         <input id="mapSearchInput" type="text" placeholder="Search for sugarcane fields..." class="w-[500px] px-6 py-3 rounded-full bg-white text-[var(--cane-900)] placeholder-[var(--cane-700)]/70 shadow-[0_4px_12px_rgba(0,0,0,0.10)] border border-[var(--cane-200)] focus:outline-none focus:ring-2 focus:ring-[var(--cane-400)]/40 focus:border-[var(--cane-300)]">
+                         <button id="mapSearchBtn" class="px-7 h-[48px] rounded-full bg-[var(--cane-800)] text-white font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.15)] hover:bg-[var(--cane-900)] transition-colors shrink-0">Search</button>
+                         <button id="expandMapBtn" class="bg-[var(--cane-700)] text-white px-3 py-2 rounded-lg hover:bg-[var(--cane-800)] transition-all duration-300 transform hover:scale-105 shadow-md shrink-0">Expand Map</button>
+                     </div>
+                 </div>
+                <!-- Map Container -->
+                <div class="relative scale-in">
+                    <div id="expandMapIcon" class="absolute top-4 right-4 z-10 bg-white rounded-full shadow-lg p-3 cursor-pointer hover:bg-[var(--cane-100)] transition-all duration-300 transform hover:scale-110">
+                        <i id="expandIcon" class="fas fa-expand text-[var(--cane-600)] text-2xl"></i>
+                    </div>
+                    <div id="refreshMapIcon" class="absolute top-4 right-16 z-10 bg-white rounded-full shadow-lg p-3 cursor-pointer hover:bg-[var(--cane-100)] transition-all duration-300 transform hover:scale-110" title="Refresh Map">
+                        <i class="fas fa-sync-alt text-[var(--cane-600)] text-xl"></i>
+                    </div>
+                    <div id="map" class="w-full h-[32rem] rounded-xl mb-4 shadow-[0_8px_22px_rgba(94,165,0,0.16)] border border-[var(--cane-200)] bg-white"></div>
+                </div>
+                
+                <!-- removed get verified section per request -->
+            </div>
+            <!-- Right Panel -->
+            <div id="sidePanel" class="w-full lg:w-96 space-y-3 fade-in-right">
+                                 <!-- Notifications -->
+                                  <div class="bg-white rounded-xl p-5 shadow-[0_8px_18px_rgba(94,165,0,0.14)] border border-[var(--cane-200)]">
+                      <h3 class="text-lg font-bold text-[var(--cane-950)] mb-6 flex items-center">
+                          <i class="fas fa-bell text-[var(--cane-500)] mr-3 text-xl"></i>
+                          Notifications
+                      </h3>
+                     <div id="notificationsList" class="space-y-3"></div>
+                 </div>
+                                 <!-- Weather Now (glassy dark) -->
+                  <div id="weatherForecast" class="weather-card p-5 text-white">
+                      <div class="relative z-[1]">
+                          <div class="flex items-start justify-between gap-4">
+                              <!-- Left: Today big -->
+                              <div class="flex-1 min-w-0">
+                                  <p class="text-white/80 text-sm">Today</p>
+                                  <h3 class="text-3xl font-extrabold tracking-tight">Weather Now</h3>
+                                  <p class="text-white/70 text-xs max-w-xs">Condition for today.</p>
+                                  <div class="flex items-end gap-2 mt-3">
+                                      <span id="wxTemp" class="text-6xl leading-none font-extrabold">--</span>
+                                      <span class="text-3xl">°C</span>
+                                      <div class="ml-3 glass px-3 py-2 text-sm">Wind: <span id="wxWind">-- km/h</span></div>
+                                  </div>
+                                  <div class="mt-3 glass p-3 w-full max-w-sm">
+                                      <p class="text-xs text-white/80 mb-2">UV Index</p>
+                                      <div class="flex items-center justify-between">
+                                          <div class="w-full h-2 bg-white/20 rounded-full overflow-hidden mr-3">
+                                              <div id="wxUvBar" class="h-full bg-gradient-to-r from-yellow-300 to-orange-400" style="width: 0%"></div>
+                                          </div>
+                                          <span id="wxUv" class="text-sm font-semibold">--</span>
+                             </div>
+                             </div>
+                         </div>
+                              <!-- Right: Upcoming compact -->
+                              <div class="w-48 glass p-3 self-stretch">
+                                  <p class="text-xs text-white/80 mb-2">Next days</p>
+                                  <div id="wxDaily" class="wx-day-list">
+                                      <div class="wx-day">
+                                          <span class="name">Tomorrow</span>
+                                          <span class="wx-pill"><i class="fas fa-cloud-rain"></i></span>
+                                          <span class="temp">--/--°</span>
+                                      </div>
+                                      <div class="wx-day">
+                                          <span class="name">+2 days</span>
+                                          <span class="wx-pill"><i class="fas fa-cloud"></i></span>
+                                          <span class="temp">--/--°</span>
+                             </div>
+                                      <div class="wx-day">
+                                          <span class="name">+3 days</span>
+                                          <span class="wx-pill"><i class="fas fa-sun"></i></span>
+                                          <span class="temp">--/--°</span>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+                     </div>
+                 </div>
+            </div>
+        </div>
+    </main>
+    <!-- Features Section -->
+    <section id="features" class="relative bg-gradient-to-br from-[var(--cane-900)] to-[var(--cane-950)]">
+        <div id="featuresInner" class="relative w-full py-12 min-h-[80vh] overflow-hidden">
+			<!-- Background image + gradient overlay -->
+			<div class="absolute inset-0">
+                <img id="featuresBg" src="../img/sugarcane.webp" alt="Sugarcane background" class="absolute inset-0 w-full h-full object-cover opacity-30">
+				<img id="featuresBgSwap" src="" alt="" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700">
+                <div class="absolute inset-0 bg-gradient-to-r from-[var(--cane-900)] via-[var(--cane-900)/80] to-transparent"></div>
+                <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[var(--cane-900)] to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[var(--cane-900)] to-transparent"></div>
+			</div>
+
+                        <div class="relative w-full">
+                <!-- Header Section -->
+                <div class="text-center mb-8 fade-in-up">
+                    <h2 class="text-5xl font-bold text-white mb-2">CaneMap Features</h2>
+                    <div class="w-24 h-1 bg-gradient-to-r from-[var(--cane-600)] to-[var(--cane-700)] mx-auto rounded-full mb-6"></div>
+                    <p class="text-xl text-[var(--cane-200)] max-w-3xl mx-auto">Discover the powerful tools designed to revolutionize sugarcane farming and agricultural management.</p>
+						</div>
+
+                <!-- Main Content Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 items-center">
+                                         <!-- Left: Feature Details Panel -->
+                     <div class="fade-in-left pl-8 md:pl-12 lg:pl-16">
+                         <h3 id="featureTitle" class="text-3xl md:text-4xl font-extrabold text-white mb-4">Field Registration & Mapping</h3>
+                         <div id="featureTags" class="flex flex-wrap items-center gap-2 mb-4">
+                             <span class="px-3 py-1 bg-white/10 rounded-full text-white text-sm font-semibold">Leaflet.js</span>
+                             <span class="px-3 py-1 bg-white/10 rounded-full text-white text-sm font-semibold">OpenStreetMap</span>
+                             <span class="px-3 py-1 bg-white/10 rounded-full text-white text-sm font-semibold">GeoJSON</span>
+					</div>
+                         <p id="featureDesc" class="text-white/90 leading-relaxed mb-6 text-base md:text-lg font-medium">Register sugarcane areas with precise map coordinates using Leaflet.js and OpenStreetMap. Draw plots, save geometry, and manage boundaries easily.</p>
+                         <button class="bg-gradient-to-r from-[var(--cane-500)] to-[var(--cane-600)] text-white px-5 py-2.5 rounded-lg hover:from-[var(--cane-600)] hover:to-[var(--cane-700)] transition-all duration-300 transform hover:scale-105 shadow-lg font-semibold flex items-center gap-3 text-base">
+                             <i class="fas fa-play text-xs"></i>
+                             <span>Explore Feature</span>
+                         </button>
+				</div>
+
+                    <!-- Right: Features Carousel -->
+                    <div class="fade-in-right">
+					<div class="featuresSwiper swiper">
+						<div class="swiper-wrapper">
+							<!-- Field Registration & Mapping -->
+                                <div class="swiper-slide relative w-[200px] h-[280px] rounded-xl overflow-hidden shadow-xl backdrop-blur-sm bg-white/10 border border-white/20" data-title="Field Registration & Mapping" data-tags="Leaflet.js,OpenStreetMap,GeoJSON" data-desc="Register sugarcane areas with precise map coordinates using Leaflet.js and OpenStreetMap. Draw plots, save geometry, and manage boundaries easily.">
+								<img src="../img/Mapping.webp" alt="Field Registration & Mapping" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                    <div class="absolute top-3 left-3">
+                                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                            <i class="fas fa-map-marked-alt text-white text-sm"></i>
+                                        </div>
+                                    </div>
+								<div class="absolute bottom-0 left-0 right-0 p-4">
+                                        <p class="text-[var(--cane-300)] text-xs font-medium mb-1">Mapping Technology</p>
+                                        <h3 class="text-white text-lg font-bold leading-tight mb-1">Field Registration & Mapping</h3>
+									<p class="text-white/80 text-xs">Leaflet + OpenStreetMap</p>
+								</div>
+							</div>
+
+							<!-- Growth Tracker & Harvest Timeline -->
+                                <div class="swiper-slide relative w-[200px] h-[280px] rounded-xl overflow-hidden shadow-xl backdrop-blur-sm bg-white/10 border border-white/20" data-title="Growth Tracker & Harvest Timeline" data-tags="Planting date,Variety alerts,Readiness" data-desc="Set planting dates and varieties to get automatic growth stage tracking and harvest readiness alerts.">
+                                <img src="../img/Tracker.jpg" alt="Growth Tracker & Harvest Timeline" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                    <div class="absolute top-3 left-3">
+                                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                            <i class="fas fa-seedling text-white text-sm"></i>
+                                        </div>
+                                    </div>
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                        <p class="text-[var(--cane-300)] text-xs font-medium mb-1">Growth Management</p>
+                                        <h3 class="text-white text-lg font-bold leading-tight mb-1">Growth Tracker & Harvest Timeline</h3>
+                                    <p class="text-white/80 text-xs">Planting date + variety alerts</p>
+                                </div>
+                            </div>
+
+							<!-- Role-Based Dashboards -->
+                                <div class="swiper-slide relative w-[200px] h-[280px] rounded-xl overflow-hidden shadow-xl backdrop-blur-sm bg-white/10 border border-white/20" data-title="Role-Based Dashboards" data-tags="Farmers,Workers,Drivers,SRA,Admins" data-desc="Separate dashboards tailored for farmers, workers, drivers, SRA officers, and admins for focused workflows.">
+                                <img src="../img/Dashboards.jpg" alt="Role-Based Dashboards" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                    <div class="absolute top-3 left-3">
+                                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                            <i class="fas fa-users-cog text-white text-sm"></i>
+                                        </div>
+                                    </div>
+                                <div class="absolute bottom-0 left-0 right-0 p-4">
+                                        <p class="text-[var(--cane-300)] text-xs font-medium mb-1">User Management</p>
+                                        <h3 class="text-white text-lg font-bold leading-tight mb-1">Role-Based Dashboards</h3>
+                                    <p class="text-white/80 text-xs">Farmers, SRA officers, admins</p>
+                                </div>
+                            </div>
+
+							<!-- Weather Forecast Integration -->
+                                <div class="swiper-slide relative w-[200px] h-[280px] rounded-xl overflow-hidden shadow-xl backdrop-blur-sm bg-white/10 border border-white/20" data-title="Weather Forecast Integration" data-tags="3-day,Weekly,Location-based" data-desc="Get location-based 3-day and weekly weather forecasts to plan field work and logistics.">
+								<img src="../img/Weather.jpg" alt="Weather Forecast Integration" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                    <div class="absolute top-3 left-3">
+                                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                            <i class="fas fa-cloud-sun text-white text-sm"></i>
+                                        </div>
+                                    </div>
+								<div class="absolute bottom-0 left-0 right-0 p-4">
+                                        <p class="text-[var(--cane-300)] text-xs font-medium mb-1">Weather Intelligence</p>
+                                        <h3 class="text-white text-lg font-bold leading-tight mb-1">Weather Forecast Integration</h3>
+									<p class="text-white/80 text-xs">3-day & weekly, location-based</p>
+								</div>
+							</div>
+
+							<!-- Transport & Logistics Coordination -->
+                                <div class="swiper-slide relative w-[200px] h-[280px] rounded-xl overflow-hidden shadow-xl backdrop-blur-sm bg-white/10 border border-white/20" data-title="Transport & Logistics Coordination" data-tags="Drivers,Truck rental,Deliveries" data-desc="Coordinate drivers, manage truck rentals, and track delivery updates in real-time.">
+								<img src="../img/Transport.jpg" alt="Transport & Logistics Coordination" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                    <div class="absolute top-3 left-3">
+                                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                            <i class="fas fa-truck text-white text-sm"></i>
+                                        </div>
+                                    </div>
+								<div class="absolute bottom-0 left-0 right-0 p-4">
+                                        <p class="text-[var(--cane-300)] text-xs font-medium mb-1">Logistics Management</p>
+                                        <h3 class="text-white text-lg font-bold leading-tight mb-1">Transport & Logistics Coordination</h3>
+									<p class="text-white/80 text-xs">Driver module, rentals, updates</p>
+                        </div>
+                    </div>
+
+							<!-- Offline Logging -->
+                                <div class="swiper-slide relative w-[200px] h-[280px] rounded-xl overflow-hidden shadow-xl backdrop-blur-sm bg-white/10 border border-white/20" data-title="Offline Logging" data-tags="No internet,Auto-sync,Background" data-desc="Log activities without internet and automatically sync when back online.">
+								<img src="../img/cane.png" alt="Offline Logging" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                    <div class="absolute top-3 left-3">
+                                        <div class="w-8 h-8 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                                            <i class="fas fa-wifi-slash text-white text-sm"></i>
+                                        </div>
+                                    </div>
+								<div class="absolute bottom-0 left-0 right-0 p-4">
+                                        <p class="text-[var(--cane-300)] text-xs font-medium mb-1">Offline Capability</p>
+                                        <h3 class="text-white text-lg font-bold leading-tight mb-1">Offline Logging</h3>
+									<p class="text-white/80 text-xs">Log tasks offline, auto-sync</p>
+                        </div>
+                    </div>
+                </div>
+					</div>
+                        <!-- Navigation Controls Below Carousel (aligned to carousel width) -->
+                        <div class="flex items-center justify-start gap-3 mt-2 z-10 relative w-full">
+                            <!-- Arrows side-by-side -->
+                            <div class="flex items-center space-x-3">
+                                <button class="swiper-button-prev !static !w-12 !h-12 rounded-full border-2 border-white hover:border-gray-300 transition-all duration-300 flex items-center justify-center bg-black/30 shadow-lg">
+                                    <i class="fas fa-chevron-left text-white text-lg"></i>
+                                </button>
+                                <button class="swiper-button-next !static !w-12 !h-12 rounded-full border-2 border-white hover:border-gray-300 transition-all duration-300 flex items-center justify-center bg-black/30 shadow-lg">
+                                    <i class="fas fa-chevron-right text-white text-lg"></i>
+                                </button>
+                </div>
+                            
+                            <!-- Progress line and slide number -->
+                            <div class="flex items-center">
+                                <div class="nav-line">
+                                    <div id="progressLine" class="progress"></div>
+                                </div>
+                                <span id="slideNumber" class="slide-number">01</span>
+                            </div>
+                        </div>
+					</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Interactive Mockups (Scrollable) -->
+    <section id="mockups" class="relative py-8 bg-[#F5F5F0]">
+            
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 items-center gap-6 px-6 md:px-10">
+                <!-- Left: Accessible Anytime, Anywhere copy -->
+                <div class="order-2 lg:order-1 max-w-2xl fade-in-left">
+                    <h3 class="text-4xl md:text-5xl lg:text-6xl font-extrabold bg-gradient-to-r from-[var(--cane-700)] to-[var(--cane-500)] bg-clip-text text-transparent mb-3">Accessible Anytime, Anywhere</h3>
+                    <p class="text-[var(--cane-900)]/90 leading-relaxed text-sm md:text-base font-medium mb-4">
+                        CaneMap is designed for flexibility and convenience. You can access our system through:
+                    </p>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-white/80 border border-[var(--cane-200)] shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[var(--cane-600)] to-[var(--cane-700)] flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-desktop text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-[var(--cane-950)] font-bold text-base">Website (Desktop/Laptop)</h4>
+                                <p class="text-[var(--cane-900)]/90 font-medium text-sm">Manage sugarcane fields with full dashboard features and real‑time mapping.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 rounded-xl bg-white/80 border border-[var(--cane-200)] shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
+                            <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-mobile-alt text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-[var(--cane-950)] font-bold text-base">Mobile Application</h4>
+                                <p class="text-[var(--cane-900)]/90 font-medium text-sm">Stay connected with maps, weather updates, and field data on the go.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-[var(--cane-900)] font-semibold text-sm md:text-base">Whether you’re in the office or in the field, CaneMap keeps you connected.</p>
+                </div>
+
+                <!-- Right: Enlarged mockup image -->
+                <div class="order-1 lg:order-2 flex justify-end fade-in-right">
+                    <img src="../img/Mockup.png" alt="CaneMap 3D Mockup" class="w-[480px] md:w-[560px] lg:w-[600px] max-w-full rounded-none shadow-none transition-transform duration-700 ease-out hover:-translate-y-1 hover:rotate-1" loading="eager" decoding="async" style="image-rendering: -webkit-optimize-contrast;" />
+            </div>
+        </div>
+    </section>
+    <!-- About Us Section -->
+    <section id="about" class="relative py-24">
+        <!-- Background image + gradient overlay (match features style) -->
+        <div class="absolute inset-0">
+            <img src="../img/sugarcane.webp" alt="Sugarcane background" class="absolute inset-0 w-full h-full object-cover">
+            <!-- green tint + fade to clear -->
+            <div class="absolute inset-0 bg-[var(--cane-900)]/45 mix-blend-multiply"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-[var(--cane-900)] via-[var(--cane-900)/80] to-transparent"></div>
+            <div class="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-[var(--cane-900)] to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-[var(--cane-900)] to-transparent"></div>
+        </div>
+        <div class="container mx-auto px-6 about-content">
+            <div class="text-center mb-16 fade-in-up">
+                <h2 class="text-5xl font-bold text-white mb-6">About CaneMap</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-[var(--cane-600)] to-[var(--cane-700)] mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="max-w-5xl mx-auto text-center mb-16 fade-in-up">
+                <p class="text-xl text-white/90 leading-relaxed font-medium">
+                    CaneMap is an agricultural decision-support platform designed to help sugarcane farmers and field workers register land, track field progress, and collaborate with the Sugar Regulatory Administration (SRA) for better transparency and productivity. Developed in collaboration with local stakeholders and SRA Ormoc Mill District, CaneMap empowers farmers through digital mapping, task coordination, and predictive analytics to make informed decisions throughout the crop cycle.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl p-10 text-center transform hover:scale-105 transition-all duration-500 border border-[var(--cane-200)] scale-in">
+                    <div class="w-16 h-16 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-bullseye text-white text-2xl"></i>
+                </div>
+                    <h3 class="text-3xl font-bold text-[var(--cane-950)] mb-6">Our Mission</h3>
+                    <p class="text-lg text-[var(--cane-900)] font-medium leading-relaxed">To empower sugarcane farmers with digital tools for better decision-making and productivity through innovative technology solutions.</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-xl p-10 text-center transform hover:scale-105 transition-all duration-500 border border-[var(--cane-200)] scale-in">
+                    <div class="w-16 h-16 bg-gradient-to-br from-[var(--cane-600)] to-[var(--cane-700)] rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-eye text-white text-2xl"></i>
+            </div>
+                    <h3 class="text-3xl font-bold text-[var(--cane-950)] mb-6">Our Vision</h3>
+                    <p class="text-lg text-[var(--cane-900)] font-medium leading-relaxed">To be the leading agricultural technology platform for sugarcane farming in the Philippines, driving digital transformation in agriculture.</p>
+                </div>
+            </div>
+        </div>
+        
+    </section>
+    <!-- Driver Badge Promo Section -->
+    <section id="driver-badge" class="relative py-24 bg-gradient-to-br from-white to-[#ECF2F6] overflow-hidden">
+        <!-- ambient blobs -->
+        <div class="blob blob-emerald w-[360px] h-[360px] -top-20 -left-20"></div>
+        <div class="blob blob-lime w-[300px] h-[300px] -bottom-10 -right-16"></div>
+        <div class="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 items-center gap-10">
+            <!-- Left copy -->
+            <div class="reveal-up">
+                <p class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-semibold mb-4">
+                    <i class="fas fa-shield-alt"></i> Verified Drivers Program
+                </p>
+                <h2 class="text-5xl md:text-6xl lg:text-7xl font-black text-[#0f172a] leading-[1.1] mb-1">Be a</h2>
+                <h2 class="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] pb-2 mb-1 bg-gradient-to-b from-[var(--cane-600)] to-[var(--cane-700)] bg-clip-text text-transparent">Driver Badge</h2>
+                <h2 class="text-5xl md:text-6xl lg:text-7xl font-black text-[#0f172a] leading-[1.1]">Holder</h2>
+                <p class="text-slate-700 text-lg max-w-xl mb-6">Get verified, receive tasks faster, and access transport features tailored for professional drivers in CaneMap.</p>
+                <a href="../Driver/Driver_Badge.html" class="inline-flex items-center gap-3 px-6 py-4 rounded-2xl bg-[var(--cane-700)] text-white font-semibold shadow hover:shadow-xl transition transform hover:-translate-y-0.5">
+                    Get Driver Badge <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Right visual: standalone image (no container frame) -->
+            <div class="relative w-[120%] lg:w-[140%] ml-auto mr-[-10%] lg:mr-[-16%]">
+                <img src="../img/Transport.jpg" alt="Driver logistics" class="w-full h-[440px] lg:h-[520px] object-cover object-center rounded-[24px] shadow-[0_20px_60px_rgba(0,0,0,0.18)]" />
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent"></div>
+                <div class="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg border border-emerald-100 px-3 py-2 flex items-center gap-2 float-slow">
+                    <i class="fas fa-check-circle text-emerald-600"></i>
+                    <span class="text-sm font-semibold text-emerald-700">Verified</span>
+                </div>
+                <div class="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg border border-emerald-100 px-3 py-2 flex items-center gap-2 float-slow" style="animation-delay:1s">
+                    <i class="fas fa-truck text-emerald-600"></i>
+                    <span class="text-sm font-semibold text-emerald-700">Hauling Ready</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Contact Section -->
+    <section id="contact" class="relative bg-gradient-to-br from-[var(--cane-100)] to-[var(--cane-200)] pt-24 pb-12">
+        <div class="custom-shape-divider-top-1755503018">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <defs>
+                    <linearGradient id="contactWaveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#5ea500" stop-opacity="1" />
+                        <stop offset="100%" stop-color="#497d00" stop-opacity="1" />
+                    </linearGradient>
+                </defs>
+                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="url(#contactWaveGradient)"></path>
+            </svg>
+        </div>
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-8 fade-in-up">
+                <h2 class="text-5xl font-bold text-[var(--cane-950)] mb-6">Get in Touch</h2>
+                <div class="w-24 h-1 bg-gradient-to-r from-[var(--cane-600)] to-[var(--cane-700)] mx-auto rounded-full"></div>
+                <p class="text-xl text-[var(--cane-900)] mt-3 max-w-2xl mx-auto">Have questions or need support? We're here to help you with your sugarcane farming needs.</p>
+            </div>
+            
+              <div class="max-w-5xl mx-auto">
+                <div class="bg-white rounded-2xl shadow-xl border border-[var(--cane-200)] p-4 md:p-6 flex flex-col lg:flex-row items-center gap-6">
+                    <!-- Left: Vector (rectangle) -->
+                    <div class="w-full lg:w-1/2">
+                        <div class="w-full h-56 md:h-64 rounded-lg overflow-hidden flex items-center justify-center bg-[var(--cane-50)] border border-[var(--cane-200)]">
+                            <dotlottie-wc src="https://lottie.host/91bcd1ed-629b-40f2-bb9c-f589f84356f9/7nRjluWgwr.lottie" style="width: 100%; height: 100%" speed="1" autoplay loop></dotlottie-wc>
+                        </div>
+                    </div>
+                    <!-- Right: Form -->
+                    <div class="w-full lg:w-1/2">
+                        <h3 class="text-xl font-bold text-[var(--cane-950)] mb-3">Send us a Message</h3>
+                          <div class="space-y-3 mb-4">
+                            <div class="flex items-center space-x-2 p-2 bg-[var(--cane-50)] rounded-md">
+                                <div class="w-6 h-6 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-full flex items-center justify-center">
+                                    <i class="fas fa-envelope text-white text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-[var(--cane-700)] font-medium">Email</p>
+                                    <p class="text-[var(--cane-900)] font-semibold text-xs">info@canemap.com</p>
+                                </div>
+                                </div>
+                            <div class="flex items-center space-x-2 p-2 bg-[var(--cane-50)] rounded-md">
+                                <div class="w-6 h-6 bg-gradient-to-br from-[var(--cane-600)] to-[var(--cane-700)] rounded-full flex items-center justify-center">
+                                    <i class="fas fa-phone text-white text-xs"></i>
+                            </div>
+                                <div>
+                                    <p class="text-xs text-[var(--cane-700)] font-medium">Phone</p>
+                                    <p class="text-[var(--cane-900)] font-semibold text-xs">+63 912 345 6789</p>
+                                </div>
+                        </div>
+                            <div class="flex items-center space-x-2 p-2 bg-[var(--cane-50)] rounded-md">
+                                <div class="w-6 h-6 bg-gradient-to-br from-[var(--cane-700)] to-[var(--cane-800)] rounded-full flex items-center justify-center">
+                                    <i class="fas fa-map-marker-alt text-white text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-[var(--cane-700)] font-medium">Location</p>
+                                    <p class="text-[var(--cane-900)] font-semibold text-xs">SRA Ormoc Mill District, Philippines</p>
+                                </div>
+                            </div>
+                        </div>
+                        <form class="space-y-3">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <input type="text" placeholder="Your Name" class="w-full px-2 py-1.5 border border-[var(--cane-300)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] bg-white text-xs font-medium">
+                                <input type="email" placeholder="Your Email" class="w-full px-2 py-1.5 border border-[var(--cane-300)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] bg-white text-xs font-medium">
+                            </div>
+                            <textarea placeholder="Your Message" rows="3" class="w-full px-2 py-1.5 border border-[var(--cane-300)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] bg-white text-xs font-medium resize-none"></textarea>
+                            <button type="submit" class="w-full bg-gradient-to-r from-[var(--cane-700)] to-[var(--cane-800)] text-white py-2 rounded-md hover:from-[var(--cane-800)] hover:to-[var(--cane-900)] transition-all duration-300 transform hover:scale-105 shadow-md font-semibold text-sm">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Footer -->
+     <footer class="bg-gradient-to-r from-[var(--cane-800)] to-[var(--cane-900)] text-white py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="text-center md:text-left mb-4 md:mb-0">
+                     <p class="text-sm text-[var(--cane-200)]">© 2025 CaneMap. All rights reserved. Developed by the CaneMap Team in collaboration with SRA Ormoc Mill District.</p>
+                    <div class="mt-2 space-x-4 text-sm">
+                         <a href="#" class="text-[var(--cane-200)] hover:text-[var(--cane-100)] transition-colors">Terms of Service</a>
+                         <a href="#" class="text-[var(--cane-200)] hover:text-[var(--cane-100)] transition-colors">Privacy Policy</a>
+                         <a href="#" class="text-[var(--cane-200)] hover:text-[var(--cane-100)] transition-colors">Help Center</a>
+                    </div>
+                </div>
+                 <button onclick="scrollToTop()" class="bg-gradient-to-br from-[var(--cane-600)] to-[var(--cane-700)] rounded-full p-3 hover:from-[var(--cane-700)] hover:to-[var(--cane-800)] transition-all duration-300 transform hover:scale-110 shadow-lg">
+                    <i class="fas fa-arrow-up text-white"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+    <!-- Floating Feedback Widget -->
+    <div id="feedbackFab" class="fixed bottom-6 right-6 flex items-center gap-2 z-[60]">
+        <div id="feedbackLabel" class="select-none px-4 py-2 rounded-full bg-[#5a6472] text-white text-sm shadow-md transition-all duration-150 opacity-0 invisible pointer-events-none">Give Feedback</div>
+        <button id="feedbackButton" aria-label="Give Feedback" class="w-14 h-14 rounded-full bg-[var(--cane-600)] shadow-xl flex items-center justify-center transition-transform hover:scale-105 hover:bg-[var(--cane-700)] focus:outline-none focus:ring-4 focus:ring-[var(--cane-600)]/30">
+            <i class="fas fa-smile text-white text-2xl"></i>
+        </button>
+    </div>
+
+    <!-- Custom Logout Confirmation Modal -->
+    <div id="logoutModal" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 opacity-0 invisible transition-opacity duration-200 ease-out z-[80]">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm border border-[var(--cane-200)] transform transition-all duration-200 ease-out translate-y-2 scale-95 opacity-0 pointer-events-none" id="logoutDialog" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+            <div class="px-5 pt-5 pb-3">
+                <h3 id="logoutTitle" class="text-lg font-bold text-[var(--cane-950)]">Confirm Logout</h3>
+                <p class="mt-2 text-[var(--cane-900)]/90 text-sm">Are you sure you want to log out?</p>
+            </div>
+            <div class="px-5 pb-5 flex justify-end gap-2">
+                <button id="logoutCancel" class="px-4 py-2 rounded-lg border border-[var(--cane-300)] text-[var(--cane-900)] bg-white hover:bg-[var(--cane-50)]">No</button>
+                <button id="logoutConfirm" class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black/40 flex items-end justify-end p-4 opacity-0 invisible transition-opacity duration-300 ease-out z-[70]">
+        <div id="feedbackDialog" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle" class="bg-white rounded-xl shadow-2xl w-[92%] max-w-md p-5 border border-gray-200 mb-24 mr-2 transform transition-all duration-300 ease-out translate-y-2 scale-95 opacity-0 pointer-events-none">
+            <div class="-mx-5 -mt-5 rounded-t-xl bg-gradient-to-b from-[var(--cane-700)] to-[var(--cane-800)] px-5 pt-6 pb-6 text-white relative">
+                <button id="feedbackClose" aria-label="Close" class="absolute top-3 right-3 w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center"><i class="fas fa-times text-white"></i></button>
+                <div class="flex flex-col items-center text-center gap-2">
+                    <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center"><i class="fas fa-smile text-white text-3xl"></i></div>
+                    <h3 id="feedbackTitle" class="text-xl font-bold">Leave us feedback</h3>
+                    <p class="text-sm text-white/90">We're always looking to improve</p>
+                </div>
+            </div>
+            <div class="pt-4">
+                <p class="uppercase tracking-wide text-[var(--cane-900)] text-xs font-bold mb-2">What kind of feedback do you have?</p>
+                <div class="rounded-xl border border-[var(--cane-200)] overflow-hidden bg-white">
+                    <button type="button" id="optLike" class="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--cane-50)]">
+                        <span class="w-8 h-8 rounded-full bg-[var(--cane-100)] flex items-center justify-center"><i class="fas fa-smile text-[var(--cane-700)]"></i></span>
+                        <span class="text-[var(--cane-900)] font-medium">I like something</span>
+                    </button>
+                    <div class="h-px bg-[var(--cane-200)]"></div>
+                    <button type="button" id="optDislike" class="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--cane-50)]">
+                        <span class="w-8 h-8 rounded-full bg-[var(--cane-100)] flex items-center justify-center"><i class="fas fa-frown text-[var(--cane-700)]"></i></span>
+                        <span class="text-[var(--cane-900)] font-medium">I don't like something</span>
+                    </button>
+                    <div class="h-px bg-[var(--cane-200)]"></div>
+                    <button type="button" id="optIdea" class="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-[var(--cane-50)]">
+                        <span class="w-8 h-8 rounded-full bg-[var(--cane-100)] flex items-center justify-center"><i class="fas fa-lightbulb text-[var(--cane-700)]"></i></span>
+                        <span class="text-[var(--cane-900)] font-medium">I have an idea</span>
+                    </button>
+                </div>
+                <!-- Simple feedback form -->
+                <form id="feedbackForm" class="mt-3 space-y-2">
+                    <input id="feedbackEmail" type="email" placeholder="Your email (optional)" class="w-full px-3 py-2 border border-[var(--cane-300)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--cane-500)] bg-white text-sm" />
+                    <textarea id="feedbackMessage" rows="3" placeholder="Type your feedback..." class="w-full px-3 py-2 border border-[var(--cane-300)] rounded-md focus:outline-none focus:ring-1 focus:ring-[var(--cane-500)] bg-white text-sm" required></textarea>
+                    <button id="feedbackSubmit" type="submit" class="w-full bg-gradient-to-r from-[var(--cane-700)] to-[var(--cane-800)] text-white py-2 rounded-md hover:from-[var(--cane-800)] hover:to-[var(--cane-900)] transition-all duration-300 font-semibold text-sm">Send Feedback</button>
+                    <p id="feedbackHint" class="text-xs text-[var(--cane-700)]">This pops up above the smile icon. Your input helps improve CaneMap.</p>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Locked Dashboard Info Modal -->
+    <div id="lockedModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 invisible transition-opacity duration-200 ease-out z-[75]">
+        <div id="lockedDialog" class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-[var(--cane-200)] transform transition-all duration-200 ease-out translate-y-2 scale-95 opacity-0 pointer-events-none">
+            <div class="px-6 pt-6 pb-4 border-b border-[var(--cane-100)]">
+                <h3 class="text-lg font-extrabold text-[var(--cane-950)] flex items-center gap-2"><i class="fas fa-lock text-[var(--cane-600)]"></i> Why is the dashboard locked?</h3>
+            </div>
+            <div class="px-6 py-4">
+                <div class="relative overflow-hidden" id="lockedSlides" data-index="0">
+                    <div class="min-h-[180px]">
+                        <!-- Intro -->
+                        <div class="slide text-[var(--cane-900)] font-medium transition-opacity duration-200" data-step="0">
+                            <p class="mb-2">Your dashboard is currently locked.</p>
+                            <p class="text-[var(--cane-700)]">Choose a path below to unlock the right tools for your role.</p>
+                        </div>
+                        <!-- Worker Guide -->
+                        <div class="slide text-[var(--cane-900)] font-medium hidden transition-opacity duration-200" data-step="1">
+                            <div class="font-bold mb-1 flex items-center gap-2"><i class="fas fa-user-hard-hat text-[var(--cane-600)]"></i> Unlock as Worker</div>
+                            <ol class="list-decimal ml-5 space-y-1 text-[var(--cane-800)]">
+                                <li>Open the map and find a registered field near you.</li>
+                                <li>Click <span class="px-2 py-0.5 rounded bg-[var(--cane-50)] border border-[var(--cane-200)]">Join Field</span>.</li>
+                                <li>Wait for the Handler to approve your request.</li>
+                                <li>Once approved, the Worker dashboard unlocks automatically.</li>
+                            </ol>
+                        </div>
+                        <!-- Handler Guide -->
+                        <div class="slide text-[var(--cane-900)] font-medium hidden transition-opacity duration-200" data-step="2">
+                            <div class="font-bold mb-1 flex items-center gap-2"><i class="fas fa-map-marked-alt text-[var(--cane-600)]"></i> Unlock as Handler</div>
+                            <ol class="list-decimal ml-5 space-y-1 text-[var(--cane-800)]">
+                                <li>Click <span class="px-2 py-0.5 rounded bg-[var(--cane-50)] border border-[var(--cane-200)]">Register Field</span> in the header.</li>
+                                <li>Fill out field details and upload required documents.</li>
+                                <li>The SRA will review your submission.</li>
+                                <li>Once approved, your Handler tools and dashboard unlock.</li>
+                            </ol>
+                        </div>
+                        <!-- Driver Guide -->
+                        <div class="slide text-[var(--cane-900)] font-medium hidden transition-opacity duration-200" data-step="3">
+                            <div class="font-bold mb-1 flex items-center gap-2"><i class="fas fa-truck text-[var(--cane-600)]"></i> Unlock as Driver</div>
+                            <ol class="list-decimal ml-5 space-y-1 text-[var(--cane-800)]">
+                                <li>Apply for a <span class="px-2 py-0.5 rounded bg-[var(--cane-50)] border border-[var(--cane-200)]">Driver Badge</span>.</li>
+                                <li>Provide your transport details and required documents.</li>
+                                <li>Wait for SRA review and approval.</li>
+                                <li>Once approved, the Driver dashboard unlocks.</li>
+                            </ol>
+                        </div>
+                        <!-- Closing Slide -->
+                        <div class="slide text-[var(--cane-900)] font-medium hidden transition-opacity duration-200" data-step="4">
+                            <div class="space-y-2">
+                                <div class="flex items-start gap-2 text-[var(--cane-800)]"><i class="fas fa-check text-[var(--cane-600)] mt-1"></i> You’re all set. Follow the steps above to unlock your tools.</div>
+                                <button id="lockedGotIt" class="px-4 py-2 rounded-lg bg-[var(--cane-700)] text-white hover:bg-[var(--cane-800)]">Got it ✅</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 pb-6 flex items-center justify-between">
+                <button id="lockedPrev" class="px-3 py-2 rounded-lg border border-[var(--cane-300)] text-[var(--cane-900)] bg-white hover:bg-[var(--cane-50)]">← Back</button>
+                <div class="text-sm text-[var(--cane-700)]" id="lockedCounter">1 / 5</div>
+                <button id="lockedNext" class="px-3 py-2 rounded-lg bg-[var(--cane-700)] text-white hover:bg-[var(--cane-800)]">Next →</button>
+            </div>
+        </div>
+    </div>
+    <!-- Backend Common scripts -->
+    <script type="module" src="../../backend/Common/firebase-config.js"></script>
+    <script src="../../backend/Common/lobby.js"></script>
+    <script>
+      // Background swapper based on today's condition only
+      (function(){
+        const card = document.getElementById('weatherForecast');
+        if (!card) return;
+
+        const IMG = {
+          rain: "../img/rain.jpg",
+          sun: "../img/sunny.jpg",
+          storm: "../img/lightning.jpg",
+          cloudy: "../img/Weather.jpg"
+        };
+
+        function pickKey(text){
+          const t = (text || "").toLowerCase();
+          if (t.includes('thunder') || t.includes('storm')) return 'storm';
+          if (t.includes('rain') || t.includes('shower') || t.includes('drizzle')) return 'rain';
+          if (t.includes('sun') || t.includes('clear')) return 'sun';
+          if (t.includes('cloud')) return 'cloudy';
+          return 'cloudy';
+        }
+
+        function extractTodayConditionFromText(raw){
+          const lines = (raw || '').split(/\n+/).map(s => s.trim()).filter(Boolean);
+          const todayIdx = lines.findIndex(l => /today/i.test(l));
+          if (todayIdx === -1) return '';
+          // Search next 1-4 lines for a condition keyword
+          const condWindow = lines.slice(todayIdx, todayIdx + 6).join(' ').toLowerCase();
+          const m = condWindow.match(/(thunderstorm|storm|light rain|moderate rain|heavy rain|rain|drizzle|sunny|clear|few clouds|broken clouds|overcast clouds|clouds)/i);
+          return m ? m[0] : '';
+        }
+
+        function guessConditionFromDOM(){
+          // Prefer a dedicated element if present
+          const todayRow = Array.from(card.querySelectorAll('*')).find(el => /today/i.test(el.textContent||''));
+          if (todayRow) {
+            // Look into the row container text
+            const block = (todayRow.closest('div') || todayRow).innerText || todayRow.textContent || '';
+            const cond = extractTodayConditionFromText(block);
+            if (cond) return pickKey(cond);
+          }
+          // Fallback: parse full card but lock to the first occurrence after 'Today'
+          return pickKey(extractTodayConditionFromText(card.innerText || card.textContent || ''));
+        }
+
+        function setBg(key){
+          const url = IMG[key] || IMG.cloudy;
+          card.style.setProperty('--wx-bg-image', `url('${url}')`);
+        }
+
+        function update(){ setBg(guessConditionFromDOM()); }
+
+        // Initial update
+        update();
+
+        // Support explicit event updates
+        window.addEventListener('canemap:weather-updated', function(e){
+          const cond = (e && e.detail && e.detail.condition) || '';
+          if (cond) setBg(pickKey(cond));
+          const temp = e?.detail?.temp;
+          if (typeof temp === 'number') {
+            const t = document.getElementById('wxTemp');
+            if (t) t.textContent = String(Math.round(temp));
+          }
+          const wind = e?.detail?.windKmh;
+          if (typeof wind === 'number') {
+            const w = document.getElementById('wxWind');
+            if (w) w.textContent = wind.toFixed(1) + ' km/h';
+          }
+          const uv = e?.detail?.uvIndex;
+          if (typeof uv === 'number') {
+            const bar = document.getElementById('wxUvBar');
+            const label = document.getElementById('wxUv');
+            const pct = Math.max(0, Math.min(100, (uv/11)*100));
+            if (bar) bar.style.width = pct + '%';
+            if (label) label.textContent = uv.toFixed(1);
+          }
+        });
+
+        // Re-check a few times to catch late content
+        let checks = 0;
+        const id = setInterval(() => { update(); if (++checks > 15) clearInterval(id); }, 2000);
+      })();
+
+      // Transform any list-based weather widget into: Big Today + compact side list
+      (function(){
+        const container = document.getElementById('weatherForecast');
+        if (!container) return;
+ 
+        function parseItemText(txt){
+          const t = (txt||'').trim();
+          const nameMatch = t.match(/(Today|Tomorrow|Mon|Tue|Wed|Thu|Fri|Sat|Sun|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)/i);
+          const temps = t.match(/-?\d+\s*°?\s*C?/gi) || [];
+          const tempPair = temps.slice(0,2).map(s=>s.replace(/[^-\d]/g,'')).filter(Boolean);
+          const condMatch = t.match(/(thunderstorm|drizzle|rain|clear|clouds|overcast|broken clouds|few clouds|light rain|moderate rain)/i);
+          return {
+            name: nameMatch ? nameMatch[0] : '',
+            tempHi: tempPair[0] ? tempPair[0] : '',
+            tempLo: tempPair[1] ? tempPair[1] : '',
+            cond: condMatch ? condMatch[0] : ''
+          };
+        }
+ 
+        function collectRows(){
+          const all = Array.from(container.querySelectorAll('*')).filter(el=>/today|tomorrow|mon|tue|wed|thu|fri|sat|sun/i.test(el.textContent||''));
+          const uniqueBlocks = [];
+          const seen = new Set();
+          for (const el of all){
+            const block = (el.closest('div')) || el;
+            if (!block) continue;
+            const key = (block.innerText||'').slice(0,120);
+            if (!key || seen.has(key)) continue;
+            seen.add(key);
+            uniqueBlocks.push(block);
+            if (uniqueBlocks.length>=4) break;
+          }
+          return uniqueBlocks.map(b=>parseItemText(b.innerText)).filter(x=>x.name);
+        }
+ 
+        let mo; let scheduled = false; let rebuildCount = 0;
+        function rebuild(){
+          if (scheduled) return;
+          scheduled = true;
+          requestAnimationFrame(() => {
+            scheduled = false;
+            try {
+              if (mo) mo.disconnect();
+              rebuild();
+            } catch(e) { /* ignore */ }
+            finally {
+              rebuildCount++;
+              if (rebuildCount < 10) { // avoid observing forever
+                if (mo) mo.observe(container, { childList: true, subtree: true });
+              }
+            }
+          });
+        }
+ 
+        // Initial and delayed attempts (widget may render late)
+        mo = new MutationObserver(() => { tryRebuild(); });
+        tryRebuild();
+        setTimeout(tryRebuild, 800);
+        setTimeout(tryRebuild, 1600);
+        mo.observe(container, { childList: true, subtree: true });
+      })();
+    </script>
+</body>
+</html>
