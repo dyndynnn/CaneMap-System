@@ -1,224 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>Forgot Password - CaneMap</title>
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-y: auto;
+import { supabase } from "./supabase-config.js";
+
+const emailInput = document.getElementById("email");
+const resetBtn = document.getElementById("resetBtn");
+const modalOverlay = document.getElementById("modalOverlay");
+const modalMessage = document.getElementById("modalMessage");
+const modalOkBtn = document.getElementById("modalOkBtn");
+
+let isSuccess = false;
+
+function showModal(message, success = false) {
+  modalMessage.textContent = message;
+  modalOverlay.style.display = "flex";
+  isSuccess = success;
+  modalOkBtn.disabled = false;
 }
 
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  position: relative;
-  padding: 0 10px;
-  box-sizing: border-box;
+function hideModal() {
+  modalOverlay.style.display = "none";
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    linear-gradient(
-      135deg, 
-      rgba(255, 255, 255, 0.2) 0%, 
-      rgba(255, 255, 255, 0.05) 50%, 
-      rgba(255, 255, 255, 0.2) 100%
-    ),
-    url('../img/sugarcane.webp') center/cover no-repeat;
-  filter: blur(10px);
-  transform: scale(1.05);
-  z-index: -1;
-}
+resetBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
 
-.container {
-  background: white;
-  padding: 28px 24px;
-  width: 100%;
-  max-width: 500px;
-  border-radius: 22px;
-  box-shadow: 0 12px 48px 0 rgba(34,197,94,0.22), 0 4px 32px 0 rgba(0,0,0,0.13);
-  transition: box-shadow 0.3s cubic-bezier(.4,2,.6,1), transform 0.3s cubic-bezier(.4,2,.6,1);
-  animation: popIn 0.6s cubic-bezier(.4,2,.6,1);
-  box-sizing: border-box;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.container:hover, .container:focus-within {
-  box-shadow: 0 18px 64px 0 rgba(34,197,94,0.32), 0 8px 40px 0 rgba(0,0,0,0.16);
-  transform: translateY(-4px) scale(1.018);
-}
-
-p {
-  font-size: 13.5px;
-}
-
-@keyframes popIn {
-  0% { opacity: 0; transform: scale(0.92) translateY(30px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-input, button {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  font-size: 16px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
-
-input:focus {
-  border-color: green;
-  box-shadow: 0 0 6px rgba(59,246,115,0.4);
-}
-
-button {
-  background: green;
-  border: none;
-  color: white;
-  padding: 11px 0;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 4px 12px rgba(59,246,115,0.4);
-}
-
-button:hover {
-  background: #28a745;
-  box-shadow: 0 6px 18px rgba(59,246,155,0.4);
-}
-
-.alert {
-  padding:10px;
-  margin-top:10px;
-  border-radius:5px;
-  font-size:14px;
-  display:none;
-}
-.error { background:#f8d7da; color:#721c24; }
-.success { background:#d4edda; color:#155724; }
-
-.back-to-login {
-  margin-top:15px;
-  text-align:center;
-}
-.back-to-login a {
-  color:#218838;
-  text-decoration:none;
-  font-weight:500;
-  font-size:13px;
-}
-.back-to-login a:hover { text-decoration:underline; }
-
-#modalOverlay {
-  position: fixed;
-  top:0; left:0; right:0; bottom:0;
-  background: rgba(0,0,0,0.5);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-#modalContent {
-  background: white;
-  padding: 20px 25px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 320px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  font-size: 1rem;
-  font-weight: 600;
-}
-#modalOkBtn {
-  margin-top: 20px;
-  padding: 8px 25px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: none;
-  border-radius: 7px;
-  background-color: #28a745;
-  color: white;
-  cursor: pointer;
-}
-#modalOkBtn:hover { background-color: #218838; }
-
-/* Responsive adjustments */
-@media (max-width: 600px) {
-  .container {
-    padding: 20px 16px;
-    border-radius: 16px;
+  // Basic validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    showModal("Invalid email. Please try again.", false);
+    return;
   }
-  .container h2 {
-    font-size: 22px;
+
+  try {
+    // Send password reset email via Supabase
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "http://127.0.0.1:5500/public/frontend/Common/farmers_resetpass.html"
+    });
+
+    if (error) {
+      console.error("Supabase error:", error.message);
+      showModal("Invalid email. Please try again.", false);
+      return;
+    }
+
+    // Success message
+    showModal("Reset link has been sent! Check your email.", true);
+  } catch (err) {
+    console.error(err);
+    showModal("Invalid email. Please try again.", false);
   }
-  p {
-    font-size: 13px;
+});
+
+// Modal OK button
+modalOkBtn.addEventListener("click", () => {
+  hideModal();
+  if (isSuccess) {
+    window.location.href = "../../frontend/Common/farmers_login.html";
   }
-  input, button {
-    font-size: 15px;
-    padding: 10px;
-  }
-}
-
-@media (max-width: 400px) {
-  .container {
-    padding: 16px 12px;
-  }
-  .container h2 {
-    font-size: 20px;
-  }
-  p {
-    font-size: 12.5px;
-  }
-  input, button {
-    font-size: 14px;
-    padding: 9px;
-  }
-}
-</style>
-</head>
-<body>
-
-<div class="container">
-  <h2>Forgot Password</h2>
-  <p>Enter your email address and we'll send you a link to reset your password.</p>
-
-  <input type="email" id="email" placeholder="Email" required />
-  <button id="resetBtn">Send Reset Link</button>
-
-  <div id="alertBox" class="alert"></div>
-
-  <p class="back-to-login">
-    <a href="farmers_login.html">Go Back to Login</a>
-  </p>
-</div>
-
-<div id="modalOverlay">
-  <div id="modalContent">
-    <div id="modalMessage">We’ve sent you a password reset link! Check your email to continue.</div>
-    <button id="modalOkBtn">OK</button>
-  </div>
-</div>
-
-    <script type="module" src="../../backend/Common/supabase-config.js"></script>
-    <script type="module" src="../../backend/Common/farmers_forgotpass.js"></script>
-
-</body>
-</html>
+  // Otherwise stay on page
+});
