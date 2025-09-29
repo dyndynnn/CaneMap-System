@@ -59,37 +59,37 @@ form.addEventListener("submit", async (e) => {
       "Password must have uppercase, lowercase, number and special character.";
     valid = false;
   }
+
   if (confirm && confirm !== password) {
     errors.confirmPassword.textContent = "Passwords do not match.";
     valid = false;
   }
+
   if (!terms) {
     errors.terms.textContent =
       "You must agree to the Terms of Service and Privacy Policy.";
     valid = false;
   }
+
   if (!valid) return;
 
-  // ---------- Check if email already exists in auth.users ----------
+  // ---------- Check if email already exists ----------
   const { data: existingUser, error: checkError } = await supabase
     .from("users")
     .select("email, status")
     .eq("email", email)
     .maybeSingle();
 
-  if (checkError) {
-    console.error("Check error:", checkError);
-  }
+  if (checkError) console.error("Check error:", checkError);
 
   if (existingUser) {
+    messageDiv.style.color = "#dc2626";
     if (existingUser.status === "unverified") {
-      messageDiv.style.color = "#dc2626";
       messageDiv.textContent =
         "This email is already registered but not yet verified. Please check your email inbox (and spam folder) for the verification link.";
       return;
     }
     if (existingUser.status === "verified") {
-      messageDiv.style.color = "#dc2626";
       messageDiv.textContent =
         "This email is already verified and in use. Please log in instead.";
       return;
@@ -114,45 +114,50 @@ form.addEventListener("submit", async (e) => {
     return;
   }
 
-  // ---------- Insert into users table ----------
-  const { error: insertError } = await supabase.from("users").insert([
-    {
-      full_name: fullName,
-      email,
-      contact,
-      role: "farmer",
-      status: "unverified", // default until email is verified
-    },
-  ]);
+  // ---------- Insert into users table with Auth UID ----------
+  if (data && data.user) {
+    const authUID = data.user.id;
 
-  if (insertError) {
-    console.error("Insert error:", insertError);
-    messageDiv.style.color = "#dc2626";
+    const { error: insertError } = await supabase.from("users").insert([
+      {
+        uid: authUID, // store Supabase Auth UID
+        full_name: fullName,
+        email,
+        contact,
+        role: "farmer",
+        status: "unverified",
+      },
+    ]);
 
-    // detect duplicate email error
-    if (
-      insertError.code === "23505" || // Postgres unique_violation
-      (insertError.message || "").toLowerCase().includes("duplicate")
-    ) {
-      messageDiv.textContent =
-        "This email is already registered. Please log in or verify your email.";
-    } else {
-      messageDiv.textContent = insertError.message;
+    if (insertError) {
+      console.error("Insert error:", insertError);
+      messageDiv.style.color = "#dc2626";
+
+      if (
+        insertError.code === "23505" ||
+        (insertError.message || "").toLowerCase().includes("duplicate")
+      ) {
+        messageDiv.textContent =
+          "This email is already registered. Please log in or verify your email.";
+      } else {
+        messageDiv.textContent = insertError.message;
+      }
+      return;
     }
-    return;
   }
 
-
-  // local storage
+  // ---------- Local storage ----------
   localStorage.setItem("farmerName", fullName);
   localStorage.setItem("farmerContact", contact);
 
+  // ---------- Show success modal ----------
   const verifyMsg = `Sign-up successful! We've sent a verification link to ${email}. Please verify your email before logging in.`;
-if (modalMessageEl) modalMessageEl.textContent = verifyMsg;
-successModal.style.display = "flex";
-modalOkBtn.onclick = () => {
-  successModal.style.display = "none";
-  window.location.href = "/public/frontend/Common/farmers_login.html";
-};
-form.reset();
+  if (modalMessageEl) modalMessageEl.textContent = verifyMsg;
+  successModal.style.display = "flex";
+  modalOkBtn.onclick = () => {
+    successModal.style.display = "none";
+    window.location.href = "/public/frontend/Common/farmers_login.html";
+  };
+
+  form.reset();
 });
