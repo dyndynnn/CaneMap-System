@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaneMap - System Admin Login</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../img/cane.png">
+    
+    <style>
+        :root {
+            --cane-50: #f7fee7;
+            --cane-100: #ecfcca;
+            --cane-200: #d8f999;
+            --cane-300: #bbf451;
+            --cane-400: #9ae600;
+            --cane-500: #7ccf00;
+            --cane-600: #5ea500;
+            --cane-700: #497d00;
+            --cane-800: #3c6300;
+            --cane-900: #35530e;
+            --cane-950: #192e03;
+        }
+        
+        /* Custom animations */
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Glass morphism effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Security indicator */
+        .security-indicator {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .security-indicator::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: scan 2s infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .login-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-[var(--cane-900)] via-[var(--cane-800)] to-[var(--cane-950)] flex items-center justify-center p-4">
+    
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 opacity-10">
+        <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;><g fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;><g fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.1&quot;><circle cx=&quot;30&quot; cy=&quot;30&quot; r=&quot;2&quot;/></g></svg>');"></div>
+    </div>
+    
+    <!-- Main Login Container -->
+    <div class="login-container relative w-full max-w-md mx-auto fade-in">
+        
+        <!-- Security Header -->
+        <div class="text-center mb-8 slide-up">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-full mb-4 shadow-lg">
+                <i class="fas fa-shield-alt text-white text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">System Admin</h1>
+        </div>
+        
+        <!-- Login Form -->
+        <div class="glass rounded-2xl p-8 shadow-2xl slide-up">
+            <form id="adminLoginForm" class="space-y-6">
+                
+                <!-- PIN Code Field -->
+                <div class="space-y-2">
+                    <label for="pinCode" class="block text-sm font-semibold text-white text-center">
+                        <i class="fas fa-key mr-2"></i>Admin PIN Code
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="pinCode" 
+                            name="pinCode" 
+                            required 
+                            class="w-full px-4 py-4 pl-12 pr-12 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:border-transparent transition-all duration-300 text-center text-2xl tracking-widest font-mono"
+                            placeholder="Enter PIN"
+                            autocomplete="off"
+                            maxlength="6"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                        >
+                        <i class="fas fa-key absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60"></i>
+                        <button 
+                            type="button" 
+                            id="togglePin" 
+                            class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                        >
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="text-center text-xs text-white/60 mt-2">Enter your 6-digit admin PIN</p>
+                </div>
+                
+                
+                <!-- Login Button -->
+                <button 
+                    type="submit" 
+                    id="loginBtn"
+                    class="w-full bg-gradient-to-r from-[var(--cane-600)] to-[var(--cane-700)] text-white py-3 px-6 rounded-lg font-semibold hover:from-[var(--cane-700)] hover:to-[var(--cane-800)] focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-300 transform hover:scale-105 shadow-lg security-indicator"
+                >
+                    <span id="loginBtnText">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Access Admin Panel
+                    </span>
+                    <div id="loginSpinner" class="spinner hidden"></div>
+                </button>
+                
+                <!-- Attempt Display -->
+                <div id="attemptDisplay" class="hidden"></div>
+                
+                <!-- Lockout Display -->
+                <div id="lockoutDisplay" class="hidden"></div>
+                
+                <!-- Security Notice -->
+                <div class="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-3">
+                    <div class="flex items-start space-x-2">
+                        <i class="fas fa-exclamation-triangle text-yellow-400 mt-0.5"></i>
+                        <div class="text-xs text-yellow-200">
+                            <p class="font-semibold mb-1">Security Notice:</p>
+                            <p>All login attempts are monitored and logged. Unauthorized access is prohibited.</p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-8 slide-up">
+            <p class="text-white/60 text-sm">
+                © 2025 CaneMap System Administration
+            </p>
+            <div class="flex items-center justify-center mt-2 space-x-4 text-xs text-white/50">
+                <span>Version 1.0.0</span>
+                <span>•</span>
+                <span>Last Updated: <span id="lastUpdate">Loading...</span></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Alert Container -->
+    <div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 flex items-center space-x-3">
+            <div class="spinner border-[var(--cane-500)] border-t-[var(--cane-500)]"></div>
+            <span class="text-gray-700 font-medium">Authenticating...</span>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script type="module" src="../../backend/Common/firebase-config.js"></script>
+    <script type="module" src="../../backend/System_Admin/login.js"></script>
+    
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set last update time
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleDateString();
+            
+            const pinInput = document.getElementById('pinCode');
+            const togglePin = document.getElementById('togglePin');
+            
+            // PIN toggle functionality
+            togglePin.addEventListener('click', function() {
+                const type = pinInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                pinInput.setAttribute('type', type);
+                
+                const icon = togglePin.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+            
+            // PIN input validation
+            pinInput.addEventListener('input', function() {
+                // Only allow numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Limit to 6 digits
+                if (this.value.length > 6) {
+                    this.value = this.value.slice(0, 6);
+                }
+                
+                // Auto-submit when 6 digits are entered
+                if (this.value.length === 6) {
+                    setTimeout(() => {
+                        document.getElementById('adminLoginForm').dispatchEvent(new Event('submit'));
+                    }, 500);
+                }
+                
+                // Visual feedback
+                if (this.value.length === 6) {
+                    this.classList.add('border-green-400');
+                    this.classList.remove('border-white/20');
+                } else {
+                    this.classList.remove('border-green-400');
+                    this.classList.add('border-white/20');
+                }
+            });
+            
+            // Keyboard support
+            pinInput.addEventListener('keydown', function(e) {
+                // Allow backspace, delete, tab, escape, enter
+                if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Auto-focus on PIN field
+            pinInput.focus();
+        });
+        
+        // Utility function to show alerts
+        function showAlert(message, type = 'error') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.id = alertId;
+            alertDiv.className = 'p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 translate-x-full';
+            
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-red-500';
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle';
+            
+            alertDiv.innerHTML = '<div class="flex items-center space-x-3">' +
+                '<i class="fas ' + icon + ' text-white"></i>' +
+                '<p class="text-white font-medium">' + message + '</p>' +
+                '<button onclick="closeAlert(\'' + alertId + '\')" class="text-white/80 hover:text-white ml-auto">' +
+                '<i class="fas fa-times"></i>' +
+                '</button>' +
+                '</div>';
+            
+            alertDiv.classList.add(bgColor);
+            alertContainer.appendChild(alertDiv);
+            
+            // Animate in
+            setTimeout(() => {
+                alertDiv.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                closeAlert(alertId);
+            }, 5000);
+        }
+        
+        function closeAlert(alertId) {
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                alert.classList.add('translate-x-full');
+                setTimeout(() => {
+                    alert.remove();
+                }, 300);
+            }
+        }
+        
+        // Prevent form submission on Enter in non-submit fields
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.type !== 'submit') {
+                e.preventDefault();
+                const form = e.target.closest('form');
+                if (form) {
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.click();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

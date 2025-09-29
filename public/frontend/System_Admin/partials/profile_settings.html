@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaneMap - Admin Profile Settings</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cane-50: #f7fee7;
+            --cane-100: #ecfcca;
+            --cane-200: #d8f999;
+            --cane-300: #bbf451;
+            --cane-400: #9ae600;
+            --cane-500: #7ccf00;
+            --cane-600: #5ea500;
+            --cane-700: #497d00;
+            --cane-800: #3c6300;
+            --cane-900: #35530e;
+            --cane-950: #192e03;
+        }
+        .card-shadow { box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,.2); border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-[var(--cane-800)] to-[var(--cane-700)] shadow-lg border-b border-[var(--cane-600)]">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="dashboard.html" class="text-white hover:text-gray-200 transition-colors">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <h1 class="text-2xl font-bold text-white">Profile Settings</h1>
+                </div>
+                <div class="flex items-center space-x-3 text-white/90">
+                    <div class="w-9 h-9 bg-gradient-to-br from-[var(--cane-400)] to-[var(--cane-500)] rounded-full flex items-center justify-center shadow">
+                        <i class="fas fa-user-shield text-white text-sm"></i>
+                    </div>
+                    <span id="headerAdminName" class="font-semibold">Admin</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl card-shadow p-6">
+                    <div class="flex flex-col items-center">
+                        <div class="relative">
+                            <img id="avatarPreview" src="https://ui-avatars.com/api/?name=Admin&background=7ccf00&color=fff" alt="Avatar" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow" />
+                            <label for="avatarInput" class="absolute bottom-0 right-0 bg-[var(--cane-600)] hover:bg-[var(--cane-700)] text-white p-2 rounded-full cursor-pointer shadow">
+                                <i class="fas fa-camera text-sm"></i>
+                            </label>
+                            <input id="avatarInput" type="file" accept="image/*" class="hidden" />
+                        </div>
+                        <h2 id="profileName" class="mt-4 text-xl font-bold text-gray-900">Admin</h2>
+                        <p id="profileRole" class="text-sm text-gray-500">System Administrator</p>
+                    </div>
+
+                    <div class="mt-6 space-y-3 text-sm text-gray-700">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-gray-500 w-4"></i>
+                            <span id="profileEmail">admin@example.com</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-gray-500 w-4"></i>
+                            <span id="profilePhone">N/A</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-id-badge text-gray-500 w-4"></i>
+                            <span id="profileStatus" class="px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Forms -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl card-shadow p-6 mb-8">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Account Information</h3>
+                    <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input id="fullName" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)]" placeholder="Your name" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input id="email" type="email" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-600" disabled />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                            <input id="phone" type="tel" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)]" placeholder="Optional" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                            <input id="role" type="text" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-600" disabled />
+                        </div>
+                        <div class="md:col-span-2 flex items-center justify-end gap-3 pt-2">
+                            <button type="button" id="cancelChanges" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-[var(--cane-600)] text-white rounded-lg hover:bg-[var(--cane-700)]">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-2xl card-shadow p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Change PIN</h3>
+                    <form id="pinForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Current PIN</label>
+                            <input id="currentPin" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)]" placeholder="••••••" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">New PIN</label>
+                            <input id="newPin" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)]" placeholder="6 digits" required />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm PIN</label>
+                            <input id="confirmPin" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)]" placeholder="Re-enter" required />
+                        </div>
+                        <div class="md:col-span-3 flex items-center justify-end gap-3 pt-2">
+                            <button type="button" id="cancelPin" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-[var(--cane-600)] text-white rounded-lg hover:bg-[var(--cane-700)]">Update PIN</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Alerts -->
+    <div id="alertContainer" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    <!-- Firebase Config & Firestore (module) -->
+    <script type="module" src="../../backend/Common/firebase-config.js"></script>
+    <script type="module">
+        import { db } from '../../backend/Common/firebase-config.js';
+        import { collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+
+        const alertContainer = document.getElementById('alertContainer');
+        const showAlert = (message, type = 'success') => {
+            const id = 'alert-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id;
+            div.className = 'p-4 rounded-lg shadow-lg max-w-sm transform transition-all duration-300 translate-x-full ' + (type === 'success' ? 'bg-green-500' : type === 'warning' ? 'bg-yellow-500' : 'bg-red-500');
+            div.innerHTML = `<div class="flex items-center space-x-3"><i class="fas ${type==='success'?'fa-check-circle':type==='warning'?'fa-exclamation-triangle':'fa-times-circle'} text-white"></i><p class="text-white font-medium">${message}</p><button onclick="document.getElementById('${id}').remove()" class="text-white/80 hover:text-white ml-auto"><i class="fas fa-times"></i></button></div>`;
+            alertContainer.appendChild(div);
+            setTimeout(()=>{ div.classList.remove('translate-x-full'); }, 50);
+            setTimeout(()=>{ div.remove(); }, 4500);
+        };
+
+        let adminDocId = null;
+        let adminData = null;
+
+        async function loadProfile() {
+            try {
+                const fromSession = sessionStorage.getItem('admin_user');
+                if (!fromSession) {
+                    showAlert('No admin session found', 'warning');
+                }
+                const sessionAdmin = fromSession ? JSON.parse(fromSession) : {};
+                // Find admin record by active pin (or email if available)
+                let snap;
+                if (sessionAdmin.pin) {
+                    const q = query(collection(db, 'admin_users'), where('pin', '==', sessionAdmin.pin), where('isActive', '==', true));
+                    snap = await getDocs(q);
+                } else if (sessionAdmin.email) {
+                    const q = query(collection(db, 'admin_users'), where('email', '==', sessionAdmin.email), where('isActive', '==', true));
+                    snap = await getDocs(q);
+                }
+                if (snap && !snap.empty) {
+                    const d = snap.docs[0];
+                    adminDocId = d.id;
+                    adminData = d.data();
+                } else {
+                    // Fallback: allow editing a local-only profile
+                    adminData = sessionAdmin || {};
+                }
+
+                // Populate UI
+                const name = adminData.name || 'Admin';
+                const email = adminData.email || 'admin@example.com';
+                const phone = adminData.phone || '';
+                const role = 'Admin';
+                const avatar = adminData.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7ccf00&color=fff`;
+
+                document.getElementById('headerAdminName').textContent = name;
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('profileEmail').textContent = email;
+                document.getElementById('profilePhone').textContent = phone || 'N/A';
+                document.getElementById('avatarPreview').src = avatar;
+                document.getElementById('fullName').value = name;
+                document.getElementById('email').value = email;
+                document.getElementById('phone').value = phone;
+                document.getElementById('role').value = role;
+            } catch (e) {
+                console.error(e);
+                showAlert('Failed to load profile', 'error');
+            }
+        }
+
+        // Avatar preview
+        document.getElementById('avatarInput').addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => { document.getElementById('avatarPreview').src = reader.result; };
+            reader.readAsDataURL(file);
+        });
+
+        // Save profile
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const name = document.getElementById('fullName').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const avatarUrl = document.getElementById('avatarPreview').src;
+
+                // Update session copy
+                const sessionAdmin = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
+                sessionAdmin.name = name;
+                sessionAdmin.phone = phone;
+                sessionAdmin.avatarUrl = avatarUrl;
+                sessionStorage.setItem('admin_user', JSON.stringify(sessionAdmin));
+
+                // Update Firestore if doc is known
+                if (adminDocId) {
+                    await updateDoc(doc(db, 'admin_users', adminDocId), {
+                        name,
+                        phone,
+                        avatarUrl,
+                        updatedAt: serverTimestamp()
+                    });
+                }
+                document.getElementById('headerAdminName').textContent = name;
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('profilePhone').textContent = phone || 'N/A';
+                showAlert('Profile updated successfully', 'success');
+            } catch (e) {
+                console.error(e);
+                showAlert('Failed to update profile', 'error');
+            }
+        });
+
+        document.getElementById('cancelChanges').addEventListener('click', loadProfile);
+
+        // Change PIN
+        document.getElementById('pinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const currentPin = (document.getElementById('currentPin').value || '').trim();
+                const newPin = (document.getElementById('newPin').value || '').trim();
+                const confirmPin = (document.getElementById('confirmPin').value || '').trim();
+
+                if (newPin.length !== 6 || /\D/.test(newPin)) {
+                    showAlert('PIN must be exactly 6 digits', 'warning');
+                    return;
+                }
+                if (newPin !== confirmPin) {
+                    showAlert('New PIN and Confirm PIN do not match', 'warning');
+                    return;
+                }
+                // Verify current pin
+                const currentStored = adminData?.pin || JSON.parse(sessionStorage.getItem('admin_user')||'{}')?.pin;
+                if (currentStored && currentPin !== String(currentStored)) {
+                    showAlert('Current PIN is incorrect', 'error');
+                    return;
+                }
+                if (!adminDocId) {
+                    showAlert('Cannot update PIN: admin record not found', 'error');
+                    return;
+                }
+                await updateDoc(doc(db, 'admin_users', adminDocId), { pin: newPin, updatedAt: serverTimestamp() });
+                // Update session copy
+                const sessionAdmin = JSON.parse(sessionStorage.getItem('admin_user') || '{}');
+                sessionAdmin.pin = newPin;
+                sessionStorage.setItem('admin_user', JSON.stringify(sessionAdmin));
+                showAlert('PIN updated successfully', 'success');
+                (['currentPin','newPin','confirmPin']).forEach(id => document.getElementById(id).value = '');
+            } catch (e) {
+                console.error(e);
+                showAlert('Failed to update PIN', 'error');
+            }
+        });
+
+        document.getElementById('cancelPin').addEventListener('click', () => {
+            (['currentPin','newPin','confirmPin']).forEach(id => document.getElementById(id).value = '');
+        });
+
+        // Init
+        loadProfile();
+    </script>
+</body>
+</html>
