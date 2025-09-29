@@ -1,160 +1,332 @@
-// public/backend/Common/signup.js
-import { supabase } from "./supabase-config.js";
-
-const form = document.getElementById("signup-form");
-const messageDiv = document.getElementById("message");
-
-const errors = {
-  fullname: document.getElementById("error-fullname"),
-  email: document.getElementById("error-email"),
-  contact: document.getElementById("error-contact"),
-  password: document.getElementById("error-password"),
-  confirmPassword: document.getElementById("error-confirm-password"),
-  terms: document.getElementById("error-terms"),
-};
-
-const successModal = document.getElementById("successModal");
-const modalOkBtn = document.getElementById("modalOkBtn");
-const modalMessageEl = document.getElementById("modalMessage");
-
-function clearErrors() {
-  for (const k in errors) errors[k].textContent = "";
-  messageDiv.textContent = "";
-  messageDiv.style.color = "#16a34a";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sign Up - CaneMap</title>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  clearErrors();
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+}
 
-  const fullName = form.fullname.value.trim();
-  const email = form.email.value.trim();
-  const contact = form.contact.value.trim();
-  const password = form.password.value;
-  const confirm = form["confirm-password"].value;
-  const terms = form.terms.checked;
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  padding: 16px;
+}
 
-  // ---------- validations ----------
-  let valid = true;
-  if (!fullName) {
-    errors.fullname.textContent = "Please enter your full name.";
-    valid = false;
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.2) 100%),
+    url('../img/sugarcane.webp') center/cover no-repeat;
+  filter: blur(10px);
+  transform: scale(1.05);
+  z-index: -1;
+}
+
+.container {
+  background: #fff;
+  width: 500px;
+  max-width: 100%;
+  padding: 20px;
+  border-radius: 22px;
+  box-shadow: 0 12px 48px 0 rgba(34,197,94,0.22), 0 4px 32px 0 rgba(0,0,0,0.13);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  transition: box-shadow 0.3s cubic-bezier(.4,2,.6,1), transform 0.3s cubic-bezier(.4,2,.6,1);
+
+  max-height: 100vh;
+  overflow-y: auto;
+}
+
+.container:hover, .container:focus-within {
+  box-shadow: 0 18px 64px 0 rgba(34,197,94,0.32), 0 8px 40px 0 rgba(0,0,0,0.16);
+  transform: translateY(-4px) scale(1.018);
+}
+
+.row-flex {
+  display: flex;
+  gap: 18px;
+  width: 100%;
+}
+.row-flex > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+h3 {
+  margin: 20px 0 10px;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #222;
+}
+p {
+  color: #666;
+  font-size: 0.7rem;
+  margin: 0 0 20px;
+  line-height: 1.3;
+}
+
+form {
+  text-align: left;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: #444;
+  font-size: 0.85rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1.8px solid #ccc;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease;
+  outline-offset: 2px;
+}
+input:focus {
+  border-color: green;
+  box-shadow: 0 0 6px rgba(59,246,115,0.4);
+}
+
+.error-message {
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin-bottom: 6px;
+  min-height: 18px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  margin: 8px 0 12px;
+  color: #555;
+}
+.checkbox-container input[type="checkbox"] {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+.checkbox-container a {
+  color: green;
+  text-decoration: none;
+  font-weight: 600;
+}
+.checkbox-container a:hover {
+  text-decoration: underline;
+}
+
+button, 
+.modal-content button {
+  width: 100%;
+  background: green;
+  border: none;
+  color: white;
+  padding: 11px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59,246,115,0.4);
+}
+button:hover, 
+.modal-content button:hover {
+  background: #28a745;
+  box-shadow: 0 6px 18px rgba(59,246,155,0.4);
+}
+
+#message {
+  margin: 8px 0 12px;
+  color: #16a34a;
+  font-weight: 600;
+  text-align: center;
+  min-height: 20px;
+}
+
+.account-login {
+  margin: 10px 0 10px;
+  font-size: 0.9rem;
+  color: #555;
+  text-align: center;
+}
+.account-login a {
+  color: green;
+  font-weight: 600;
+  text-decoration: none;
+}
+.account-login a:hover {
+  text-decoration: underline;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+}
+.modal-content {
+  background-color: #fff;
+  padding: 25px 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+}
+.modal-content p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .container {
+    width: 100%;
+    padding: 16px;
   }
-
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRegex.test(email)) {
-    errors.email.textContent = "Please enter a valid email.";
-    valid = false;
+  .row-flex {
+    flex-direction: column;
+    gap: 0;
   }
-
-  const contactRegex = /^\+?\d{10,15}$/;
-  if (!contact || !contactRegex.test(contact)) {
-    errors.contact.textContent = "Please enter a valid contact number.";
-    valid = false;
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    padding: 7px 8px;
+    font-size: 0.85rem;
   }
-
-  const strongPass = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/;
-  if (!password || password.length < 8 || !strongPass.test(password)) {
-    errors.password.textContent =
-      "Password must have uppercase, lowercase, number and special character.";
-    valid = false;
+  button {
+    padding: 10px 0;
+    font-size: 0.95rem;
   }
-  if (confirm && confirm !== password) {
-    errors.confirmPassword.textContent = "Passwords do not match.";
-    valid = false;
+  .checkbox-container {
+    font-size: 0.75rem;
   }
-  if (!terms) {
-    errors.terms.textContent =
-      "You must agree to the Terms of Service and Privacy Policy.";
-    valid = false;
+}
+
+@media (max-height: 700px) {
+  body {
+    align-items: flex-start;
+    padding: 8px;
   }
-  if (!valid) return;
-
-  // ---------- Check if email already exists in auth.users ----------
-  const { data: existingUser, error: checkError } = await supabase
-    .from("users")
-    .select("email, status")
-    .eq("email", email)
-    .maybeSingle();
-
-  if (checkError) {
-    console.error("Check error:", checkError);
+  .container {
+    margin: 8px auto;
+    padding: 14px;
+    max-height: calc(100vh - 16px);
   }
+}
 
-  if (existingUser) {
-    if (existingUser.status === "unverified") {
-      messageDiv.style.color = "#dc2626";
-      messageDiv.textContent =
-        "This email is already registered but not yet verified. Please check your email inbox (and spam folder) for the verification link.";
-      return;
-    }
-    if (existingUser.status === "verified") {
-      messageDiv.style.color = "#dc2626";
-      messageDiv.textContent =
-        "This email is already verified and in use. Please log in instead.";
-      return;
-    }
+@media (max-width: 400px) {
+  .container {
+    width: 95%;
+    padding: 12px;
   }
+}
 
-  // ---------- Supabase sign-up ----------
-  const redirectURL = `${window.location.origin}/public/frontend/Common/farmers_login.html`;
+</style>
+</head>
+<body>
+  <div class="container">
+    <h3>Create An Account</h3>
+    <p>Join CaneMap and start managing your sugarcane fields digitally.</p>
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: redirectURL,
-      data: { full_name: fullName, contact, role: "farmer" },
-    },
-  });
+    <form id="signup-form" novalidate>
+      <label for="fullname">Full Name</label>
+      <input type="text" id="fullname" name="fullname" placeholder="eg. Juan Dela Cruz" required />
+      <div id="error-fullname" class="error-message"></div>
 
-  if (error) {
-    messageDiv.style.color = "#dc2626";
-    messageDiv.textContent = error.message;
-    return;
-  }
+      <div class="row-flex">
+        <div>
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="eg. juan@gmail.com" required />
+          <div id="error-email" class="error-message"></div>
+        </div>
+        <div>
+          <label for="contact">Contact Number</label>
+          <input type="text" id="contact" name="contact" placeholder="+63 9xx xxx xxxx" required />
+          <div id="error-contact" class="error-message"></div>
+        </div>
+      </div>
 
-  // ---------- Insert into users table ----------
-  const { error: insertError } = await supabase.from("users").insert([
-    {
-      full_name: fullName,
-      email,
-      contact,
-      role: "farmer",
-      status: "unverified", // default until email is verified
-    },
-  ]);
+      <div class="row-flex">
+        <div>
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" minlength="8" placeholder="********" required />
+          <div id="error-password" class="error-message"></div>
+        </div>
+        <div>
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" name="confirm-password" minlength="8" placeholder="********" required />
+          <div id="error-confirm-password" class="error-message"></div>
+        </div>
+      </div>
 
-  if (insertError) {
-    console.error("Insert error:", insertError);
-    messageDiv.style.color = "#dc2626";
+      <input type="hidden" id="role" name="role" value="farmer" />
 
-    // detect duplicate email error
-    if (
-      insertError.code === "23505" || // Postgres unique_violation
-      (insertError.message || "").toLowerCase().includes("duplicate")
-    ) {
-      messageDiv.textContent =
-        "This email is already registered. Please log in or verify your email.";
-    } else {
-      messageDiv.textContent = insertError.message;
-    }
-    return;
-  }
+      <div class="checkbox-container">
+        <input type="checkbox" id="terms" name="terms" required />
+        <label for="terms">I agree to the <a href="#" target="_blank" rel="noopener">Terms of Service</a> and <a href="#" target="_blank" rel="noopener">Privacy Policy</a></label>
+      </div>
+      <div id="error-terms" class="error-message" style="margin-top: -18px; margin-bottom: 12px;"></div>
 
+      <button type="submit">Sign Up</button>
+    </form>
 
-  // local storage
-  localStorage.setItem("farmerName", fullName);
-  localStorage.setItem("farmerContact", contact);
+  <div id="message"></div>
+  <p class="account-login">
+  Already have an account? 
+          <a href="farmers_login.html">Login</a>
+  </p>
 
-  const verifyMsg = `Sign-up successful! We've sent a verification link to ${email}. Please verify your email before logging in.`;
-  messageDiv.style.color = "#16a34a";
-  messageDiv.textContent = verifyMsg;
-  if (modalMessageEl) modalMessageEl.textContent = verifyMsg;
-  successModal.style.display = "flex";
-  modalOkBtn.onclick = () => {
-    successModal.style.display = "none";
-    window.location.href = "/public/frontend/Common/farmers_login.html";
-  };
-  form.reset();
-});
+  </div>
+
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <p id="modalMessage">Sign-up successful! Please check your email to verify your account before logging in.</p>
+      <button id="modalOkBtn">OK</button>
+    </div>
+  </div>
+
+<script type="module" src="../../backend/Common/supabase-config.js"></script>
+<script type="module" src="../../backend/Common/signup.js"></script>
+
+</body>
+</html>
