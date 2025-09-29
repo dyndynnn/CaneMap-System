@@ -1,187 +1,249 @@
-// public/backend/Common/farmers_login.js
-import { supabase } from "./supabase-config.js";
-
-let alertBox = document.getElementById("alertBox");
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const loginButton = document.querySelector("button[type='submit']");
-
-const MAX_ATTEMPTS = 5;
-const LOCK_TIME = 30 * 1000; // 30s lockout
-
-function showAlert(message, type) {
-  if (!alertBox) {
-    alertBox = document.createElement("div");
-    alertBox.id = "alertBox";
-    alertBox.className = "alert";
-    document.querySelector(".container").appendChild(alertBox);
-  }
-  alertBox.innerHTML = message;
-  alertBox.className = `alert ${type}`;
-  alertBox.style.display = "block";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Login</title>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-y: auto;
 }
 
-function disableForm(seconds) {
-  emailInput.disabled = true;
-  passwordInput.disabled = true;
-  loginButton.disabled = true;
-
-  let remaining = seconds;
-  loginButton.textContent = `Try again in ${remaining}s`;
-
-  const countdown = setInterval(() => {
-    remaining--;
-    loginButton.textContent = `Try again in ${remaining}s`;
-
-    if (remaining <= 0) {
-      clearInterval(countdown);
-      emailInput.disabled = false;
-      passwordInput.disabled = false;
-      loginButton.disabled = false;
-      loginButton.textContent = "Login";
-      alertBox.style.display = "none";
-    }
-  }, 1000);
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 
-function isLocked() {
-  const lockUntil = localStorage.getItem("lockUntil");
-  if (lockUntil && Date.now() < parseInt(lockUntil)) {
-    const remaining = Math.ceil((parseInt(lockUntil) - Date.now()) / 1000);
-    showAlert(`Too many failed attempts. Try again in ${remaining} seconds.`, "error");
-    disableForm(remaining);
-    return true;
-  }
-  return false;
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(
+      135deg, 
+      rgba(255, 255, 255, 0.2) 0%, 
+      rgba(255, 255, 255, 0.05) 50%, 
+      rgba(255, 255, 255, 0.2) 100%
+    ),
+    url('../img/sugarcane.webp') center/cover no-repeat;
+  filter: blur(10px);
+  transform: scale(1.05);
+  z-index: -1;
 }
 
-function recordFailedAttempt() {
-  let attempts = parseInt(localStorage.getItem("loginAttempts") || "0") + 1;
-  localStorage.setItem("loginAttempts", attempts);
-
-  if (attempts >= MAX_ATTEMPTS) {
-    localStorage.setItem("lockUntil", Date.now() + LOCK_TIME);
-    localStorage.setItem("loginAttempts", 0);
-    showAlert(`Too many failed attempts. Please try again in ${LOCK_TIME / 1000} seconds.`, "error");
-    disableForm(LOCK_TIME / 1000);
-  }
+.container {
+  background: #fff;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 24px;
+  border-radius: 22px;
+  box-shadow: 0 12px 48px 0 rgba(34,197,94,0.22), 0 4px 32px 0 rgba(0,0,0,0.13);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  transition: box-shadow 0.3s cubic-bezier(.4,2,.6,1), transform 0.3s cubic-bezier(.4,2,.6,1);
+  animation: popIn 0.6s cubic-bezier(.4,2,.6,1);
+  box-sizing: border-box;
 }
 
-function resetAttempts() {
-  localStorage.setItem("loginAttempts", 0);
-  localStorage.removeItem("lockUntil");
+.container:hover, .container:focus-within {
+  box-shadow: 0 18px 64px 0 rgba(34,197,94,0.32), 0 8px 40px 0 rgba(0,0,0,0.16);
+  transform: translateY(-4px) scale(1.018);
 }
 
-async function login() {
-  if (isLocked()) return;
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-
-  try {
-    // ✅ Sign in with Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      const code = (error.message || "").toLowerCase();
-      if (code.includes("invalid login")) {
-        showAlert("Incorrect email or password. Please try again.", "error");
-      } else {
-        showAlert(error.message, "error");
-      }
-      recordFailedAttempt();
-      passwordInput.value = "";
-      return;
-    }
-
-  const user = data.user;
-
-  if (!user) {
-    showAlert("Login failed. Please try again.", "error");
-    return;
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(30px);
   }
-
-  // ✅ Check if email is verified
-  if (!user.email_confirmed_at) {
-    showAlert(
-      "Your email is registered but not yet verified. Please check your inbox.",
-      "warning"
-    );
-    passwordInput.value = "";
-    recordFailedAttempt();
-    return;
-  }
-
-  // ✅ Fetch extra details from `users` table
-  const { data: userDetails, error: userError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("email", email)
-    .maybeSingle();
-
-  let profile;
-  if (userDetails) {
-    profile = userDetails;
-  } else {
-    console.warn("No row found in users table, using auth metadata as fallback");
-    profile = {
-      full_name: user.user_metadata?.full_name || user.email,
-      contact: user.user_metadata?.contact || "",
-      role: user.user_metadata?.role || "farmer",
-      status: "verified",
-    };
-
-    // Optional: auto-insert missing row
-    const { error: insertFallback } = await supabase.from("users").insert([
-      {
-        full_name: profile.full_name,
-        email: user.email,
-        contact: profile.contact,
-        role: profile.role,
-        status: "verified",
-      },
-    ]);
-    if (insertFallback) console.error("Insert fallback failed:", insertFallback);
-  }
-
-  // ✅ Always use profile
-  localStorage.setItem("farmerName", profile.full_name || "User");
-  localStorage.setItem("farmerContact", profile.contact || "");
-  localStorage.setItem("userRole", profile.role || "farmer");
-  localStorage.setItem("userId", user.id);
-
-  resetAttempts();
-  showAlert("Login successful!", "success");
-
-  // Redirect
-  setTimeout(() => {
-    if (profile.role === "sra_officer") {
-      window.location.href = "../../frontend/SRA/SRA_Dashboard.html";
-    } else {
-      window.location.href = "../../frontend/Common/lobby.html";
-    }
-  }, 1500);
-
-
-  } catch (err) {
-    console.error("Unexpected error:", err);
-    showAlert("Login failed. Please try again.", "error");
-    recordFailedAttempt();
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-document.getElementById("loginForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  login();
-});
+h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 28px;
+}
 
-document.querySelectorAll("#email, #password").forEach((input) => {
-  input.addEventListener("focus", () => {
-    if (alertBox) alertBox.style.display = "none";
-  });
-});
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
 
-isLocked();
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  border-radius: 7px;
+  border: 1.8px solid #ccc;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease;
+  outline-offset: 2px;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: green;
+  box-shadow: 0 0 6px rgba(59,246,115,0.4);
+}
+
+button {
+  width: 100%;
+  background: green;
+  border: none;
+  color: white;
+  padding: 11px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 246, 115, 0.4);
+}
+
+button:hover {
+  background:  #28a745;
+  box-shadow: 0 6px 18px rgba(59,246,155,0.4);
+}
+
+.alert {
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 14px;
+  display: none;
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.signup-text {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 14px;
+  color: #555;
+}
+
+.signup-text a {
+  color: green;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.signup-text a:hover {
+  text-decoration: underline;
+}
+
+.forgot-pass {
+  text-align: right;
+  margin: 5px 0 10px;
+  font-size: 13px;
+}
+
+.forgot-pass a {
+  color: #155724;
+  text-decoration: none;
+}
+
+.forgot-pass a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .container {
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+  h2 {
+    font-size: 22px;
+  }
+  input {
+    font-size: 15px;
+    padding: 10px;
+  }
+  button {
+    font-size: 0.95rem;
+    padding: 10px 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+    padding: 16px 12px;
+  }
+  h2 {
+    font-size: 20px;
+  }
+  input {
+    font-size: 14px;
+    padding: 9px;
+  }
+  button {
+    font-size: 0.9rem;
+    padding: 9px 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Login</h2>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <p class="forgot-pass">
+      <a href="farmers_forgotpass.html">Forgot password?</a>
+    </p>
+    <button type="submit">Login</button>
+  </form>
+
+  <div id="alertBox" class="alert"></div>
+
+  <p class="signup-text">
+    Don't have an account yet? 
+    <a href="signup.html">Sign up here</a>
+  </p>
+</div>
+
+    <script type="module" src="../../backend/Common/firebase-config.js?v=2"></script>
+    <script type="module" src="../../backend/Common/farmers_login.js?v=3"></script>
+
+</body>
+</html>
