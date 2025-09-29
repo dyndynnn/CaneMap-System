@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CaneMap - Driver Badge Application</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cane-50: #f7fee7;
+            --cane-100: #ecfcca;
+            --cane-200: #d8f999;
+            --cane-300: #bbf451;
+            --cane-400: #9ae600;
+            --cane-500: #7ccf00;
+            --cane-600: #5ea500;
+            --cane-700: #497d00;
+            --cane-800: #3c6300;
+            --cane-900: #35530e;
+            --cane-950: #192e03;
+        }
+        
+        .form-input:focus {
+            border-color: var(--cane-500);
+            box-shadow: 0 0 0 3px rgba(124, 207, 0, 0.1);
+        }
+        
+        .form-select:focus {
+            border-color: var(--cane-500);
+            box-shadow: 0 0 0 3px rgba(124, 207, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cane-500), var(--cane-600));
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--cane-600), var(--cane-700));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(94, 165, 0, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--cane-200), var(--cane-300));
+            color: var(--cane-800);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, var(--cane-300), var(--cane-400));
+            transform: translateY(-1px);
+        }
+        
+        .section-card {
+            background: linear-gradient(135deg, white, var(--cane-50));
+            border: 1px solid var(--cane-200);
+            transition: all 0.3s ease;
+        }
+        
+        .section-card:hover {
+            box-shadow: 0 8px 25px rgba(94, 165, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--cane-400), var(--cane-500), var(--cane-600));
+        }
+        
+        .checkbox-custom:checked {
+            background-color: var(--cane-500);
+            border-color: var(--cane-500);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-[var(--cane-100)] to-[var(--cane-200)] min-h-screen">
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-white to-[var(--cane-50)] shadow-lg border-b-2 border-[var(--cane-200)]">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../Common/lobby.html" class="text-[var(--cane-600)] hover:text-[var(--cane-700)] transition-colors">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                </div>
+                <div class="text-left">
+                    <h2 class="text-xl font-semibold text-[var(--cane-800)]">Driver Badge Application</h2>
+                    <p class="text-sm text-[var(--cane-600)]">Transport & Logistics Coordination</p>
+                </div>
+                <div class="w-20"></div> 
+            </div>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="bg-white border-b border-[var(--cane-200)]">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-[var(--cane-500)] text-white rounded-full flex items-center justify-center text-sm font-semibold">1</div>
+                    <span class="text-sm font-medium text-[var(--cane-700)]">Personal Info</span>
+                </div>
+                <div class="flex-1 h-1 bg-[var(--cane-200)] rounded-full">
+                    <div class="progress-bar h-1 rounded-full" style="width: 25%"></div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-[var(--cane-200)] text-[var(--cane-600)] rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+                    <span class="text-sm font-medium text-[var(--cane-600)]">License & Vehicle</span>
+                </div>
+                <div class="flex-1 h-1 bg-[var(--cane-200)] rounded-full"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-[var(--cane-200)] text-[var(--cane-600)] rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+                    <span class="text-sm font-medium text-[var(--cane-600)]">Documents</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Form Container -->
+            <form id="driverBadgeForm" class="space-y-8">
+                
+                <!-- Personal Information Section -->
+                <div class="section-card rounded-xl p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-lg flex items-center justify-center">
+                            <i class="fas fa-user text-white text-lg"></i>
+            </div>
+                <div>
+                            <h3 class="text-xl font-bold text-[var(--cane-900)]">Personal Information</h3>
+                            <p class="text-[var(--cane-600)]">Provide your basic personal details for verification</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-user-circle text-[var(--cane-500)] mr-2"></i>
+                                Full Name *
+                            </label>
+                            <input type="text" name="fullname" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="Enter your complete name">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-phone text-[var(--cane-500)] mr-2"></i>
+                                Contact Number *
+                            </label>
+                            <input type="tel" name="contact_number" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="+63 XXX XXX XXXX">
+                        </div>
+                        
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-map-marker-alt text-[var(--cane-500)] mr-2"></i>
+                                Complete Address *
+                            </label>
+                            <input type="text" name="address" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="Street, Barangay, City, Province">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-calendar text-[var(--cane-500)] mr-2"></i>
+                                Date of Birth *
+                            </label>
+                            <input type="date" name="birth_date" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-envelope text-[var(--cane-500)] mr-2"></i>
+                                Email Address
+                            </label>
+                            <input type="email" name="email"
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="your.email@example.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Driver's License Section -->
+                <div class="section-card rounded-xl p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-lg flex items-center justify-center">
+                            <i class="fas fa-id-card text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-[var(--cane-900)]">Driver's License Information</h3>
+                            <p class="text-[var(--cane-600)]">Provide your valid driver's license details</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-credit-card text-[var(--cane-500)] mr-2"></i>
+                                License Number *
+                            </label>
+                            <input type="text" name="license_number" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="Enter your license number">
+                        </div>
+                        
+                <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-calendar-check text-[var(--cane-500)] mr-2"></i>
+                                License Expiry Date *
+                            </label>
+                            <input type="date" name="license_expiry" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-car text-[var(--cane-500)] mr-2"></i>
+                                License Type *
+                            </label>
+                            <select name="license_type" required
+                                    class="form-select w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                                <option value="">Select license type...</option>
+                                <option value="A">A - Motorcycle</option>
+                                <option value="B">B - Car/Light Vehicle</option>
+                                <option value="C">C - Truck</option>
+                                <option value="D">D - Bus</option>
+                                <option value="E">E - Trailer</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-shield-alt text-[var(--cane-500)] mr-2"></i>
+                                License Status *
+                            </label>
+                            <select name="license_status" required
+                                    class="form-select w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                                <option value="">Select status...</option>
+                                <option value="valid">Valid</option>
+                                <option value="expired">Expired</option>
+                                <option value="suspended">Suspended</option>
+                                <option value="revoked">Revoked</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vehicle Information Section -->
+                <div class="section-card rounded-xl p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-lg flex items-center justify-center">
+                            <i class="fas fa-truck text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-[var(--cane-900)]">Vehicle Information</h3>
+                            <p class="text-[var(--cane-600)]">Details about your transport vehicle(s)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-hashtag text-[var(--cane-500)] mr-2"></i>
+                                Vehicle Plate Number *
+                            </label>
+                            <input type="text" name="plate_number" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="e.g., ABC 123">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-car text-[var(--cane-500)] mr-2"></i>
+                                Vehicle Make & Model
+                            </label>
+                            <input type="text" name="vehicle_model"
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="e.g., Isuzu NPR">
+                        </div>
+                        
+                <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-calendar text-[var(--cane-500)] mr-2"></i>
+                                Vehicle Year
+                            </label>
+                            <input type="number" name="vehicle_year" min="1990" max="2024"
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="e.g., 2020">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-palette text-[var(--cane-500)] mr-2"></i>
+                                Vehicle Color
+                            </label>
+                            <input type="text" name="vehicle_color"
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="e.g., White">
+                        </div>
+                        </div>
+                    
+                    <div class="mt-6">
+                        <label class="block text-sm font-semibold text-[var(--cane-800)] mb-3">
+                            <i class="fas fa-list-check text-[var(--cane-500)] mr-2"></i>
+                            Vehicle Type(s) - Select all that apply *
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <label class="flex items-center p-3 border-2 border-[var(--cane-300)] rounded-lg hover:border-[var(--cane-400)] transition-colors cursor-pointer">
+                                <input type="checkbox" name="vehicle_types[]" value="hauling_truck" class="checkbox-custom w-4 h-4 text-[var(--cane-600)] border-[var(--cane-300)] rounded focus:ring-[var(--cane-500)] mr-3">
+                        <div>
+                                    <span class="font-medium text-[var(--cane-800)]">Hauling Truck</span>
+                                    <p class="text-xs text-[var(--cane-600)]">For transporting sugarcane</p>
+                                </div>
+                                </label>
+                            
+                            <label class="flex items-center p-3 border-2 border-[var(--cane-300)] rounded-lg hover:border-[var(--cane-400)] transition-colors cursor-pointer">
+                                <input type="checkbox" name="vehicle_types[]" value="tractor_trailer" class="checkbox-custom w-4 h-4 text-[var(--cane-600)] border-[var(--cane-300)] rounded focus:ring-[var(--cane-500)] mr-3">
+                                <div>
+                                    <span class="font-medium text-[var(--cane-800)]">Tractor + Trailer</span>
+                                    <p class="text-xs text-[var(--cane-600)]">Agricultural equipment</p>
+                                </div>
+                                </label>
+                            
+                            <label class="flex items-center p-3 border-2 border-[var(--cane-300)] rounded-lg hover:border-[var(--cane-400)] transition-colors cursor-pointer">
+                                <input type="checkbox" name="vehicle_types[]" value="other" class="checkbox-custom w-4 h-4 text-[var(--cane-600)] border-[var(--cane-300)] rounded focus:ring-[var(--cane-500)] mr-3">
+                                <div>
+                                    <span class="font-medium text-[var(--cane-800)]">Other</span>
+                                    <p class="text-xs text-[var(--cane-600)]">Specify below</p>
+                                </div>
+                                </label>
+                            </div>
+                        
+                        <div class="mt-4">
+                            <input type="text" name="other_vehicle_type"
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="If 'Other' selected, please specify vehicle type">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Required Documents Section -->
+                <div class="section-card rounded-xl p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-alt text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-[var(--cane-900)]">Required Documents</h3>
+                            <p class="text-[var(--cane-600)]">Upload necessary documents for verification</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-id-card text-[var(--cane-500)] mr-2"></i>
+                                Driver's License (Front & Back) *
+                            </label>
+                            <input type="file" name="license_front" accept="image/*,.pdf" required
+                                   class="w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                            <p class="text-xs text-[var(--cane-600)] mt-2">Front side of license</p>
+                        </div>
+                        
+                <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-id-card text-[var(--cane-500)] mr-2"></i>
+                                Driver's License (Back) *
+                            </label>
+                            <input type="file" name="license_back" accept="image/*,.pdf" required
+                                   class="w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                            <p class="text-xs text-[var(--cane-600)] mt-2">Back side of license</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-user text-[var(--cane-500)] mr-2"></i>
+                                Recent Photo (2x2) *
+                            </label>
+                            <input type="file" name="photo" accept="image/*" required
+                                   class="w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                            <p class="text-xs text-[var(--cane-600)] mt-2">Professional 2x2 photo</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-car text-[var(--cane-500)] mr-2"></i>
+                                Vehicle OR/CR (if applicable)
+                            </label>
+                            <input type="file" name="vehicle_orcr" accept="image/*,.pdf"
+                                   class="w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                            <p class="text-xs text-[var(--cane-600)] mt-2">Official Receipt & Certificate of Registration</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information Section -->
+                <div class="bg-gradient-to-r from-[var(--cane-50)] to-[var(--cane-100)] border border-[var(--cane-300)] rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-600)] to-[var(--cane-700)] rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-info text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-[var(--cane-800)] mb-3">What happens after submission?</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <ul class="text-sm text-[var(--cane-700)] space-y-2">
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-check-circle text-[var(--cane-500)] mt-1"></i>
+                                        <span>Your application will be reviewed by SRA officers</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-clock text-[var(--cane-500)] mt-1"></i>
+                                        <span>Review process takes 3-5 working days</span>
+                                    </li>
+                                </ul>
+                                <ul class="text-sm text-[var(--cane-700)] space-y-2">
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-badge text-[var(--cane-500)] mt-1"></i>
+                                        <span>Once approved, you'll receive your driver badge</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-truck text-[var(--cane-500)] mt-1"></i>
+                                        <span>You can then accept transport assignments</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certification and Submit -->
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-3 p-4 bg-white border border-[var(--cane-200)] rounded-lg">
+                        <input type="checkbox" id="certify" required class="mt-1 w-5 h-5 text-[var(--cane-600)] border-[var(--cane-300)] rounded focus:ring-[var(--cane-500)]">
+                        <label for="certify" class="text-sm text-[var(--cane-700)]">
+                            I hereby certify that all information provided above is true, accurate, and complete to the best of my knowledge. I understand that providing false information may result in the rejection of my application or revocation of my driver badge.
+                    </label>
+                </div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+                        <a href="../Common/lobby.html" class="btn-secondary px-8 py-3 rounded-lg font-semibold text-center">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn-primary px-8 py-3 rounded-lg font-semibold text-white">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit Driver Badge Application
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-[var(--cane-800)] to-[var(--cane-900)] text-white py-6 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-sm text-[var(--cane-200)]">© 2025 CaneMap. All rights reserved. Developed by the CaneMap Team in collaboration with SRA Ormoc Mill District.</p>
+    </div>
+    </footer>
+
+    <script type="module" src="../../backend/Driver/Driver_Badge.js"></script>
+
+
+</body>
+</html>
