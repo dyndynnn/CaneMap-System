@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaneMap - SRA Dashboard</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --cane-50: #f7fee7;
+            --cane-100: #ecfcca;
+            --cane-200: #d8f999;
+            --cane-300: #bbf451;
+            --cane-400: #9ae600;
+            --cane-500: #7ccf00;
+            --cane-600: #5ea500;
+            --cane-700: #497d00;
+            --cane-800: #3c6300;
+            --cane-900: #35530e;
+            --cane-950: #192e03;
+        }
+        
+        /* App shell styling to match reference UI */
+        .app-header {
+            background: linear-gradient(180deg, var(--cane-600), var(--cane-700));
+            border-bottom: 3px solid rgba(0,0,0,0.05);
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, var(--cane-400), var(--cane-600));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .sidebar-surface { background-color: #0f172a; }
+        .sidebar-divider { height: 1px; background-color: rgba(255,255,255,0.08); margin: 1rem 0; }
+        .sidebar-section-title { color: #e2e8f0; opacity: 0.8; font-size: 0.95rem; margin-bottom: 0.5rem; }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cane-500), var(--cane-600));
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--cane-600), var(--cane-700));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(94, 165, 0, 0.3);
+        }
+        
+        .section-card { background: #ffffff; border: 1px solid var(--cane-200); transition: all 0.3s ease; }
+        
+        .section-card:hover {
+            box-shadow: 0 8px 25px rgba(94, 165, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .metric-card { background: var(--cane-50); border: 1px solid var(--cane-200); transition: all 0.3s ease; }
+        
+        .metric-card:hover {
+            box-shadow: 0 4px 15px rgba(94, 165, 0, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .inner-content-box { background: #fbfde9; border: 1px solid var(--cane-200); }
+        
+        .sidebar-transition {
+            transition: transform 0.3s ease-in-out;
+        }
+        
+        .sidebar-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-[#eef2f7] min-h-screen overflow-hidden">
+    <!-- Header -->
+    <header class="app-header shadow-md">
+        <div class="container mx-auto px-6 py-4 text-white">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <a href="../Common/lobby.html" class="hover:opacity-90 transition-opacity">
+                        <i class="fas fa-arrow-left text-xl"></i>
+                    </a>
+                    <h1 class="text-2xl font-bold tracking-tight">CaneMap</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <!-- Notifications -->
+                    <div class="relative">
+                        <button class="hover:opacity-90 transition-opacity relative">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span>
+                        </button>
+                    </div>
+                    <!-- Profile -->
+                    <div class="relative">
+                        <button id="profileBtn" class="flex items-center space-x-2 hover:opacity-90 transition-opacity">
+                            <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <span id="headerUserName" class="font-medium">SRA Officer</span>
+                            <i class="fas fa-chevron-down text-white/80 text-xs"></i>
+                        </button>
+                        <!-- Dropdown -->
+                        <div id="profileMenu" class="hidden absolute right-0 mt-2 w-44 bg-white text-[var(--cane-900)] rounded-lg shadow-lg ring-1 ring-black/5 py-2 z-50">
+                            <a href="#" id="profileSettings" class="block px-4 py-2 text-sm hover:bg-gray-100">
+                                <i class="fas fa-cog mr-2 text-gray-500"></i>Profile Settings
+                            </a>
+                            <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                                <i class="fas fa-right-from-bracket mr-2 text-gray-500"></i>Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content with Sidebar -->
+    <div class="flex relative">
+        <!-- Mobile Sidebar Overlay -->
+        <div id="sidebarOverlay" class="sidebar-overlay fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+        
+        <!-- Left Sidebar -->
+        <div id="sidebar" class="sidebar-transition fixed lg:static inset-y-0 left-0 z-50 w-64 min-h-screen shadow-lg transform -translate-x-full lg:translate-x-0 bg-slate-900">
+            <div class="p-6">
+                <!-- Sidebar Profile Block -->
+                <div class="flex items-center space-x-3 mb-2">
+                    <div class="w-10 h-10 bg-[var(--cane-500)] rounded-full flex items-center justify-center text-white shadow">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div>
+                        <div id="sidebarUserName" class="text-white font-semibold leading-tight">SRA Officer</div>
+                        <div class="text-gray-300 text-xs">Normal Access</div>
+                    </div>
+                </div>
+                <div class="h-px bg-white/10 my-4"></div>
+                
+                <!-- Close button for mobile -->
+                <div class="flex justify-end lg:hidden mb-4">
+                    <button id="closeSidebarBtn" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Navigation Menu -->
+                <nav class="space-y-2">
+                    <a href="#dashboard" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl bg-slate-800 text-white font-medium" data-section="dashboard">
+                        <i class="fas fa-gauge"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <div class="text-slate-200/80 text-sm mt-2">Overview</div>
+                    
+                    <a href="#field-documents" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-colors" data-section="field-documents">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Review Applications</span>
+                    </a>
+                    
+                    <a href="#reports" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-colors" data-section="reports">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </a>
+                    
+                    <a href="#analytics" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition-colors" data-section="analytics">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 px-4 lg:px-6 py-8 h-[calc(100vh-72px)] overflow-hidden">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section">
+                <h1 class="text-3xl font-bold text-[var(--cane-900)] mb-8">Dashboard</h1>
+                
+                <!-- Key Metrics/Statistics -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="metric-card rounded-xl p-6 cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-[var(--cane-500)] rounded-lg flex items-center justify-center mr-4 text-white">
+                                <i class="fas fa-file-alt text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-[var(--cane-700)]">Total Submissions</p>
+                                <p class="text-2xl font-semibold text-[var(--cane-900)]">247</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card rounded-xl p-6 cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-[var(--cane-500)] rounded-lg flex items-center justify-center mr-4 text-white">
+                                <i class="fas fa-clock text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-[var(--cane-700)]">Pending Review</p>
+                                <p class="text-2xl font-semibold text-[var(--cane-900)]">32</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card rounded-xl p-6 cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-[var(--cane-500)] rounded-lg flex items-center justify-center mr-4 text-white">
+                                <i class="fas fa-check text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-[var(--cane-700)]">Reviewed Today</p>
+                                <p class="text-2xl font-semibold text-[var(--cane-900)]">18</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="metric-card rounded-xl p-6 cursor-pointer hover:scale-[1.02] transition-transform duration-300">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-[var(--cane-500)] rounded-lg flex items-center justify-center mr-4 text-white">
+                                <i class="fas fa-seedling text-white text-xl"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-[var(--cane-700)]">Active Fields</p>
+                                <p class="text-2xl font-semibold text-[var(--cane-900)]">89</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Dashboard Content -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Recent Field Applications Section -->
+                    <div class="section-card rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-[var(--cane-900)] mb-4 flex items-center">
+                            <i class="fas fa-file-alt text-[var(--cane-500)] mr-3"></i>
+                            Recent Field Applications
+                                </h3>
+                        <div class="inner-content-box rounded-lg p-4">
+                            <div class="bg-[var(--cane-100)] rounded-t-lg p-3 mb-2 border-b border-[var(--cane-200)]">
+                                <h4 class="font-semibold text-[var(--cane-800)]">Field Applications</h4>
+                            </div>
+                            <div id="recentAppsList" class="space-y-2 min-h-[160px]"></div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications Section -->
+                    <div class="section-card rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-[var(--cane-900)] mb-4 flex items-center">
+                            <i class="fas fa-bell text-[var(--cane-500)] mr-3"></i>
+                            Notifications
+                            </h3>
+                        <div id="notificationsList" class="space-y-3 min-h-[160px]"></div>
+                        <div class="pt-2">
+                            <a href="#" class="text-sm text-[var(--cane-600)] hover:text-[var(--cane-700)] font-medium">
+                                View all notifications
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Other Content Sections (Hidden by default) -->
+            <div id="field-documents" class="content-section hidden">
+                <!-- Load the field documents partial -->
+                <div id="fieldDocsContainer"></div>
+            </div>
+
+            <div id="reports" class="content-section hidden">
+                <div class="section-card rounded-xl p-6">
+                    <h2 class="text-2xl font-bold text-[var(--cane-900)] mb-6">Reports</h2>
+                    <p class="text-[var(--cane-600)]">Report generation and management functionality will be implemented here.</p>
+                </div>
+            </div>
+
+            <div id="analytics" class="content-section hidden">
+                <div class="section-card rounded-xl p-6">
+                    <h2 class="text-2xl font-bold text-[var(--cane-900)] mb-6">Analytics</h2>
+                    <p class="text-[var(--cane-600)]">Analytics and data visualization functionality will be implemented here.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SRA Dashboard JavaScript -->
+    <script>
+        // Global variables
+        let currentSection = 'dashboard';
+
+        // Initialize dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async function() {
+            setupEventListeners();
+            try {
+                const { auth, db } = await import('../../backend/Common/firebase-config.js');
+                const { onAuthStateChanged, signOut } = await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js');
+                const { collection, query, orderBy, limit, getDocs, doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js');
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        // Check if user is verified
+                        if (!user.emailVerified) {
+                            alert('Please verify your email before accessing the SRA dashboard.');
+                            window.location.href = '../Common/farmers_login.html';
+                            return;
+                        }
+                        
+                        // Check user role in Firestore
+                        const userRef = doc(db, 'users', user.uid);
+                        const userSnap = await getDoc(userRef);
+                        const userRole = userSnap.exists() ? userSnap.data().role : 'farmer';
+                        
+                        if (userRole !== 'sra_officer') {
+                            alert('Access denied. This dashboard is only for SRA Officers.');
+                            window.location.href = '../Common/lobby.html';
+                            return;
+                        }
+                        
+                        const display = user.displayName || user.email || 'SRA Officer';
+                        const headerName = document.getElementById('headerUserName');
+                        const sideName = document.getElementById('sidebarUserName');
+                        if (headerName) headerName.textContent = display;
+                        if (sideName) sideName.textContent = display;
+                        // Load recent applications into dashboard card
+                        try {
+                            const list = document.getElementById('recentAppsList');
+                            if (list) {
+                                list.innerHTML = '<div class="text-sm text-[var(--cane-700)] p-4">Loading applications…</div>';
+                                const appsRef = collection(db, 'field_applications');
+                                const q = query(appsRef, orderBy('createdAt', 'desc'), limit(5));
+                                const snap = await getDocs(q);
+                                if (snap.empty) {
+                                    list.innerHTML = '<div class="text-sm text-[var(--cane-700)] p-4 text-center">No recent applications to display</div>';
+                                } else {
+                                    list.innerHTML = '';
+                                    snap.forEach(d => {
+                                        const a = d.data();
+                                        const item = document.createElement('div');
+                                        item.className = 'flex items-start justify-between px-4 py-3 border border-[var(--cane-200)] rounded-lg bg-white/60';
+                                        const left = document.createElement('div');
+                                        left.className = 'flex items-start space-x-3';
+                                        left.innerHTML = '<div class="w-8 h-8 bg-[var(--cane-500)] text-white rounded-full flex items-center justify-center">\n  <i class="fas fa-user"></i>\n</div>'+
+                                            '<div><div class="font-medium text-[var(--cane-900)]">'+(a.applicantName||'Applicant')+'</div>'+
+                                            '<div class="text-xs text-[var(--cane-600)]">'+(a.barangay||'')+'</div></div>';
+                                        const badge = document.createElement('span');
+                                        const status = a.status || 'pending';
+                                        badge.className = 'text-xs px-2 py-1 rounded '+(status==='reviewed'?'bg-green-100 text-green-700':'bg-gray-100 text-gray-700');
+                                        badge.textContent = status==='reviewed'?'Reviewed':'Pending Review';
+                                        item.appendChild(left); item.appendChild(badge);
+                                        list.appendChild(item);
+                                    });
+                                }
+                            }
+                        } catch(_) {}
+
+                        // Load notifications
+                        try {
+                            const nList = document.getElementById('notificationsList');
+                            if (nList) {
+                                nList.innerHTML = '<div class="text-sm text-[var(--cane-700)] p-4">Loading notifications…</div>';
+                                const notiRef = collection(db, 'notifications');
+                                const nq = query(notiRef, orderBy('createdAt', 'desc'), limit(5));
+                                const nsnap = await getDocs(nq);
+                                if (nsnap.empty) {
+                                    nList.innerHTML = '<div class="text-sm text-[var(--cane-700)] p-4 text-center">No notifications</div>';
+                                } else {
+                                    nList.innerHTML = '';
+                                    nsnap.forEach(d => {
+                                        const n = d.data();
+                                        const row = document.createElement('div');
+                                        row.className = 'flex items-start space-x-3';
+                                        row.innerHTML = '<div class="w-2 h-2 bg-[var(--cane-500)] rounded-full mt-2"></div>'+
+                                            '<div><p class="text-sm font-medium text-[var(--cane-800)]">'+(n.title||'Notification')+'</p>'+
+                                            '<p class="text-xs text-[var(--cane-600)]">'+formatRelativeTime(n.createdAt)+'</p></div>';
+                                        nList.appendChild(row);
+                                    });
+                                }
+                            }
+                        } catch(_) {}
+                    } else {
+                        // redirect to login if needed
+                    }
+                });
+                const profileBtn = document.getElementById('profileBtn');
+                const profileMenu = document.getElementById('profileMenu');
+                if (profileBtn && profileMenu) {
+                    profileBtn.addEventListener('click', () => {
+                        profileMenu.classList.toggle('hidden');
+                    });
+                    window.addEventListener('click', (e) => {
+                        if (!profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
+                            profileMenu.classList.add('hidden');
+                        }
+                    });
+                }
+                const logoutBtn = document.getElementById('logoutBtn');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', async () => {
+                        try { 
+                            await signOut(auth); 
+                            // Clear localStorage
+                            localStorage.removeItem('farmerName');
+                            localStorage.removeItem('userRole');
+                            localStorage.removeItem('userId');
+                            window.location.href = '../Common/farmers_login.html'; 
+                        } catch(_) {}
+                    });
+                }
+            } catch (e) {
+                // eslint-disable-next-line no-console
+                console.error('Auth init failed', e);
+            }
+        });
+
+        // Navigation functionality
+        function showSection(sectionId) {
+            // Hide all content sections
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            const selectedSection = document.getElementById(sectionId);
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+            
+            // Update active nav item using Tailwind classes
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-slate-800', 'text-white');
+                item.classList.add('text-slate-300');
+            });
+            
+            const activeNavItem = document.querySelector(`[data-section="${sectionId}"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('bg-slate-800', 'text-white');
+                activeNavItem.classList.remove('text-slate-300');
+            }
+            
+            currentSection = sectionId;
+        }
+
+        function formatRelativeTime(ts){
+            try{
+                const d = ts && ts.seconds ? new Date(ts.seconds*1000) : new Date(ts || Date.now());
+                const diff = Math.floor((Date.now() - d.getTime())/1000);
+                if (diff < 60) return `${diff}s ago`;
+                const m = Math.floor(diff/60); if (m < 60) return `${m} minute${m>1?'s':''} ago`;
+                const h = Math.floor(m/60); if (h < 24) return `${h} hour${h>1?'s':''} ago`;
+                const days = Math.floor(h/24); return `${days} day${days>1?'s':''} ago`;
+            }catch{ return ''; }
+        }
+
+        // Sidebar functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                if (sidebar.classList.contains('-translate-x-full')) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('hidden');
+                }
+            }
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar && overlay) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Sidebar toggle
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', closeSidebar);
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', closeSidebar);
+            }
+            
+            // Navigation menu
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                    if (sectionId === 'field-documents') {
+                        // simple fetch to load the partial once
+                        const container = document.getElementById('fieldDocsContainer');
+                        if (container && container.childElementCount === 0) {
+                            fetch('SRA_FieldDocuments.html')
+                                .then(r => r.text())
+                                .then(html => { 
+                                    container.innerHTML = html; 
+                                    // initialize dynamic review list
+                                    import('../../backend/SRA/Review.js').then(m => m.SRAReview.init());
+                                })
+                                .catch(() => { container.innerHTML = '<div class="text-[var(--cane-700)]">Unable to load field documents.</div>'; });
+                        }
+                    }
+                    
+                    // Close sidebar on mobile after navigation
+                    if (window.innerWidth < 1024) {
+                        closeSidebar();
+                    }
+                });
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024) {
+                    closeSidebar();
+                }
+            });
+        }
+
+        // Export functions for use in HTML
+        window.showSection = showSection;
+        window.toggleSidebar = toggleSidebar;
+        window.closeSidebar = closeSidebar;
+    </script>
+</body>
+</html> 
