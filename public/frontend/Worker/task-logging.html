@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaneMap - Task Logging</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- Firebase Task Logging Backend -->
+    <script type="module" src="../backend/Worker/task-logging.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen bg-gray-50">
+        <!-- Header -->
+        <header class="bg-white shadow-sm border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-4">
+                    <div class="flex items-center">
+                        <a href="../Common/lobby.html" class="text-gray-400 hover:text-gray-600 mr-4">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        </a>
+                        <h1 class="text-xl font-semibold text-gray-900">Task Logging</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:8 py-8">
+            <!-- Message Container -->
+            <div id="message-container"></div>
+
+            <!-- Field Info -->
+            <div class="bg-white rounded-lg shadow-sm border mb-8">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2" id="field-name">Loading field information...</h2>
+                    <p class="text-sm text-gray-600" id="field-location">Loading location...</p>
+                    <p class="text-sm text-gray-600">Owner: <span id="field-owner">Loading owner...</span></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Log New Task -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">Log New Task</h3>
+                        <p class="text-sm text-gray-600">Record your daily activities</p>
+                    </div>
+                    
+                    <form id="task-log-form" enctype="multipart/form-data" class="p-6 space-y-4">
+                        <div>
+                            <label for="task_name" class="block text-sm font-medium text-gray-700 mb-1">Task Name *</label>
+                            <input type="text" id="task_name" name="task_name" required
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="e.g., Fertilizer application, Irrigation, Harvesting">
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <textarea id="description" name="description" rows="3"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                      placeholder="Describe what you did..."></textarea>
+                        </div>
+
+                        <div>
+                            <label for="task_status" class="block text-sm font-medium text-gray-700 mb-1">Task Status *</label>
+                            <select id="task_status" name="task_status" required
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="done">Done</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="not_yet_done">Not Yet Done</option>
+                                <option value="delayed">Delayed</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="selfie" class="block text-sm font-medium text-gray-700 mb-1">Selfie in Field</label>
+                            <input type="file" id="selfie" name="selfie" accept=".jpg,.jpeg,.png"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Take a photo of yourself in the field</p>
+                        </div>
+
+                        <div>
+                            <label for="field_photo" class="block text-sm font-medium text-gray-700 mb-1">Field Photo</label>
+                            <input type="file" id="field_photo" name="field_photo" accept=".jpg,.jpeg,.png"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <p class="text-xs text-gray-500 mt-1">Photo of the field or work area</p>
+                        </div>
+
+                        <button type="submit" class="w-full btn-primary py-2 px-4 rounded-md">
+                            Log Task
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Task History -->
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Tasks</h3>
+                        <p class="text-sm text-gray-600">Latest activities in this field</p>
+                    </div>
+                    
+                    <div class="p-6">
+                        <div id="task-logs-container">
+                            <div class="text-center py-8">
+                                <div class="text-gray-400 mb-4">
+                                    <i data-lucide="loader" class="w-12 h-12 mx-auto animate-spin"></i>
+                                </div>
+                                <p class="text-gray-500">Loading task logs...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Field Map -->
+            <div class="mt-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Field Location</h2>
+                <div class="bg-white rounded-lg shadow-sm border">
+                    <div class="p-6">
+                        <div id="fieldMap" class="map-container" style="height: 400px;"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Global variables
+        let taskLoggingManager;
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // Initialize Task Logging Manager
+                taskLoggingManager = new TaskLoggingManager();
+                
+                // Set up form event listeners
+                setupFormListeners();
+            } catch (error) {
+                console.error('Error initializing task logging system:', error);
+                showMessage('Failed to initialize task logging system. Please refresh the page.', 'error');
+            }
+        });
+
+        // Set up form event listeners
+        function setupFormListeners() {
+            // Task log form
+            document.getElementById('task-log-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await handleTaskLogSubmission();
+            });
+        }
+
+        // Handle task log submission
+        async function handleTaskLogSubmission() {
+            try {
+                const form = document.getElementById('task-log-form');
+                const formData = new FormData(form);
+                
+                // Basic validation
+                const taskName = formData.get('task_name');
+                const taskStatus = formData.get('task_status');
+                
+                if (!taskName || !taskStatus) {
+                    showMessage('Please fill in all required fields.', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Logging Task...';
+                submitBtn.disabled = true;
+
+                const result = await taskLoggingManager.submitTaskLog(formData);
+                
+                if (result.success) {
+                    showMessage(result.message, 'success');
+                    form.reset();
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting task log:', error);
+                showMessage('An unexpected error occurred. Please try again.', 'error');
+            } finally {
+                // Reset button state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Log Task';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Show message (success or error)
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('message-container');
+            if (!messageContainer) return;
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `px-4 py-3 rounded-lg mb-6 ${
+                type === 'error' 
+                    ? 'bg-red-50 border border-red-200 text-red-700' 
+                    : 'bg-green-50 border border-green-200 text-green-700'
+            }`;
+            messageDiv.textContent = message;
+
+            messageContainer.appendChild(messageDiv);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+    </script>
+
+    <style>
+        /* Task status styling */
+        .task-done {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .task-in_progress {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .task-not_yet_done {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .task-delayed {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Button styling */
+        .btn-primary {
+            background-color: #2563eb;
+            color: white;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+        
+        .btn-primary:focus {
+            outline: none;
+            ring: 2px;
+            ring-offset: 2px;
+            ring-blue-500;
+        }
+        
+        /* Map container */
+        .map-container {
+            width: 100%;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        /* Custom scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</body>
+</html>
