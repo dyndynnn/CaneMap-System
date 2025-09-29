@@ -1,0 +1,22 @@
+<!-- Field Applications Review partial: include inside SRA dashboard main area -->
+<div class="section-card rounded-xl p-6">
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <h2 class="text-2xl font-bold text-[var(--cane-900)]">Field Applications Review</h2>
+      <p class="text-sm text-[var(--cane-600)]">Review and add comments to registered field documents</p>
+    </div>
+    <div>
+      <select id="fieldDocsStatus" class="px-3 py-2 border border-[var(--cane-2 00)] rounded-lg text-sm">
+        <option value="all">All Status</option>
+        <option value="pending">Pending Review</option>
+        <option value="reviewed">Reviewed</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="inner-content-box rounded-lg">
+    <div class="border-b border-[var(--cane-200)] px-4 py-2 text-[var(--cane-800)] font-semibold">Pending Applications</div>
+    <div id="fieldDocsDynamic" class="min-h-[120px]"></div>
+  </div>
+</div>
+
