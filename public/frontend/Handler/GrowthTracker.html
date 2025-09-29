@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CaneMap - Tasks & Growth Tracker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{--cane-50:#f7fee7;--cane-100:#ecfcca;--cane-200:#d8f999;--cane-300:#bbf451;--cane-400:#9ae600;--cane-500:#7ccf00;--cane-600:#5ea500;--cane-700:#497d00;--cane-800:#3c6300;--cane-900:#35530e;--cane-950:#192e03;}
+  .section-card{background:white;border:1px solid var(--cane-200);} .inner-box{background:var(--cane-50);border:1px solid var(--cane-200);} .badge{padding:.15rem .5rem;border-radius:.375rem;font-size:.75rem;font-weight:600}
+  .badge-done{background:#e6fffa;color:#047857;border:1px solid #99f6e4}
+  .badge-progress{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+  .badge-not{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa}
+  .badge-delayed{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+  .stage-active{border-color:var(--cane-500);}
+  .drop-zone{border:2px dashed var(--cane-200);}
+</style>
+</head>
+<body class="bg-gradient-to-br from-[var(--cane-100)] to-[var(--cane-200)] min-h-screen text-[var(--cane-900)]">
+
+  <header class="bg-white/80 backdrop-blur border-b border-[var(--cane-200)]">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-4">
+      <div class="flex items-center gap-3">
+        <a href="dashboard.html" class="text-[var(--cane-700)] hover:text-[var(--cane-800)]"><i class="fa-solid fa-arrow-left"></i></a>
+        <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-[var(--cane-700)] to-[var(--cane-500)] bg-clip-text text-transparent">Tasks & Growth Tracker</h1>
+      </div>
+      <nav class="mt-3 flex flex-wrap gap-2 text-sm">
+        <a href="dashboard.html" class="px-3 py-1.5 rounded bg-gray-100 border">Dashboard</a>
+        <a href="Task_Panel.html" class="px-3 py-1.5 rounded bg-gray-100 border">Task Panel</a>
+        <a href="Report.html" class="px-3 py-1.5 rounded bg-gray-100 border">Reports</a>
+        <a href="GrowthTracker.html" class="px-3 py-1.5 rounded bg-[var(--cane-700)] text-white">Growth Tracker</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10 space-y-8">
+    <!-- GROWTH TRACKER HEADER + STATUS like in image -->
+    <section class="space-y-4">
+      <div>
+        <h2 class="font-semibold text-[var(--cane-900)]">Growth Tracker</h2>
+        <p class="text-xs text-[var(--cane-800)]">Monitor sugarcane growth and estimate harvest times with 90% accuracy</p>
+      </div>
+      <!-- Field select -->
+      <div class="section-card rounded-xl p-0 overflow-hidden">
+        <div class="px-3 py-2 text-xs text-[var(--cane-800)] bg-[var(--cane-50)] border-b border-[var(--cane-200)]">Select Field</div>
+        <div class="relative">
+          <select id="gtField" class="appearance-none w-full px-4 py-2 pr-10 text-sm bg-white focus:outline-none">
+            <option>Field A</option>
+            <option>Field B</option>
+            <option>Field C</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-2.5 text-gray-500 text-xs"></i>
+        </div>
+      </div>
+
+      <p class="font-semibold text-sm">Field A - Growth Status</p>
+      <div class="section-card rounded-xl p-4 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
+          <div>
+            <div class="text-[var(--cane-800)] mb-1">Crop Variety:</div>
+            <div class="inner-box rounded px-3 py-1.5" id="uiVariety">Phil 99-1793</div>
+          </div>
+          <div>
+            <div class="text-[var(--cane-800)] mb-1">Days Since Planting:</div>
+            <div class="inner-box rounded px-3 py-1.5"><span id="uiDays">0</span> Days</div>
+          </div>
+          <div>
+            <div class="text-[var(--cane-800)] mb-1">Location:</div>
+            <div class="inner-box rounded px-3 py-1.5">Block 7, Section A</div>
+          </div>
+          <div>
+            <div class="text-[var(--cane-800)] mb-1">Date Planted:</div>
+            <div class="inner-box rounded px-3 py-1.5" id="uiPlanted">—</div>
+          </div>
+          <div>
+            <div class="text-[var(--cane-800)] mb-1">Current Growth Stage:</div>
+            <div class="inner-box rounded px-3 py-1.5" id="uiStage">—</div>
+          </div>
+          <div>
+            <div class="text-[var(--cane-800)] mb-1">Area Size:</div>
+            <div class="inner-box rounded px-3 py-1.5">2.5</div>
+          </div>
+        </div>
+
+        <div class="inner-box rounded-lg p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked class="w-4 h-4"> Harvest Estimate</div>
+            <button class="text-[10px] px-2 py-1 rounded border border-[var(--cane-300)] bg-white text-[var(--cane-800)]">Achieve Growth</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <div class="text-[var(--cane-800)] text-xs">Estimated Harvest Date</div>
+              <div class="font-semibold" id="uiHarvest">-</div>
+              <div class="text-[10px] text-gray-600">± 5 days variance</div>
+            </div>
+            <div>
+              <div class="text-[var(--cane-800)] text-xs">Days Remaining</div>
+              <div class="font-semibold"><span id="uiRemain">0</span> Days</div>
+              <div class="text-[10px] text-gray-600">Approximately <span id="uiMonths">0</span> months</div>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center gap-2 text-[10px] text-gray-700"><i class="fa-solid fa-circle-info"></i> 90% estimate accuracy based on continuous task logs and timestamps</div>
+        </div>
+      </div>
+
+      <div class="section-card rounded-xl p-4">
+        <p class="font-semibold text-sm mb-4">Growth Timeline</p>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-start gap-2"><span class="mt-1 w-3 h-3 rounded-full bg-[var(--cane-600)]"></span><div><p class="font-semibold">Germination</p><p class="text-xs text-gray-700" id="tlGerm">Completed -</p></div></div>
+          <div class="flex items-start gap-2"><span class="mt-1 w-3 h-3 rounded-full bg-[var(--cane-400)]"></span><div><p class="font-semibold">Tillering Stage</p><p class="text-xs text-gray-700" id="tlTill">In Progress - <span id="tlPct">0</span>% Complete</p></div></div>
+          <div class="w-full h-1 bg-gray-300 rounded relative overflow-hidden"><div id="tlBar" class="absolute left-0 top-0 h-1 bg-[var(--cane-600)]" style="width:0%"></div></div>
+          <div class="flex items-start gap-2"><span class="mt-1 w-3 h-3 rounded-full bg-gray-300"></span><div><p class="font-semibold">Grand Growth</p><p class="text-xs text-gray-700" id="tlGrand">Expected -</p></div></div>
+          <div class="flex items-start gap-2"><span class="mt-1 w-3 h-3 rounded-full bg-gray-300"></span><div><p class="font-semibold">Maturity</p><p class="text-xs text-gray-700" id="tlMat">Expected -</p></div></div>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button class="px-3 py-1.5 rounded bg-[var(--cane-700)] text-white text-sm"><i class="fa-solid fa-plus mr-2"></i>Log Activity</button>
+          <button class="px-3 py-1.5 rounded bg-gray-100 border text-sm"><i class="fa-solid fa-file-export mr-2"></i>Export Report</button>
+          <button class="px-3 py-1.5 rounded bg-gray-100 border text-sm"><i class="fa-solid fa-share-nodes mr-2"></i>Share Progress</button>
+        </div>
+      </div>
+    </section>
+    
+
+  <script>
+    // -------- Logs --------
+    const logsEl = document.getElementById('logs');
+    const statusToBadge = (s)=>{
+      if(s==='Done') return 'badge badge-done';
+      if(s==='In Progress') return 'badge badge-progress';
+      if(s==='Not Yet Done') return 'badge badge-not';
+      return 'badge badge-delayed';
+    }
+    function addLog({member, task, desc, status}){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bg-white border border-[var(--cane-200)] rounded-lg p-3 flex items-start justify-between';
+      wrapper.innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-full flex items-center justify-center text-white"><i class="fa-solid fa-user"></i></div>
+          <div>
+            <p class="font-semibold">${member}</p>
+            <p class="text-sm text-[var(--cane-800)] leading-tight">${task}${desc?(' - '+desc):''}</p>
+          </div>
+        </div>
+        <span class="${statusToBadge(status)}">${status}</span>
+      `;
+      logsEl.prepend(wrapper);
+    }
+    document.getElementById('logForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const member = document.getElementById('logMember').value;
+      const task = document.getElementById('logTask').value;
+      const desc = document.getElementById('logDesc').value.trim();
+      const status = document.querySelector('input[name="status"]:checked').value;
+      addLog({member, task, desc, status});
+      e.target.reset();
+    });
+    // Seed a couple logs
+    addLog({member:'Anna Reyes', task:'Fertilization', desc:'Applied organic fertilizer', status:'Done'});
+    addLog({member:'Carl Ramos', task:'Weeding', desc:'Section B ongoing', status:'In Progress'});
+
+    // -------- Assign Task (simple toast) --------
+    document.getElementById('assignForm').addEventListener('submit',(e)=>{
+      e.preventDefault();
+      const title = document.getElementById('taskTitle').value || 'New Task';
+      const assignee = document.getElementById('assignee').value;
+      const toast = document.createElement('div');
+      toast.className='fixed bottom-4 right-4 bg-[var(--cane-800)] text-white px-4 py-2 rounded shadow';
+      toast.textContent = `Assigned \"${title}\" to ${assignee==='all'?'All Members':assignee}`;
+      document.body.appendChild(toast);
+      setTimeout(()=>toast.remove(),2500);
+      e.target.reset();
+    });
+
+    // -------- Growth Tracker Logic --------
+    const plantedInput = document.getElementById('gtPlanted');
+    const daysEl = document.getElementById('gtDays');
+    const stageEl = document.getElementById('gtStage');
+    const harvestEl = document.getElementById('gtHarvest');
+    const timelineEl = document.getElementById('timeline');
+
+    const stages = [
+      {key:'planting', title:'Planting', desc:'Field preparation, planting setts/cuttings.', start:0, end:0},
+      {key:'germination', title:'Germination (0–30d)', desc:'Buds sprout and roots/shoots emerge.', start:0, end:30},
+      {key:'tillering', title:'Tillering (30–120d)', desc:'Shoots develop; stalk number established.', start:30, end:120},
+      {key:'grand', title:'Grand Growth (120–270d)', desc:'Rapid elongation; biomass accumulates.', start:120, end:270},
+      {key:'maturity', title:'Maturity (270–365+d)', desc:'Sugar concentration increases.', start:270, end:365},
+      {key:'harvest', title:'Harvesting', desc:'Cutting and transporting to mill.', start:365, end:400}
+    ];
+
+    function renderTimeline(currentDay){
+      timelineEl.innerHTML='';
+      stages.forEach((s,idx)=>{
+        const state = currentDay>=s.end ? 'completed' : (currentDay>=s.start ? 'active' : 'upcoming');
+        const card = document.createElement('div');
+        card.className='inner-box rounded-lg p-3 border-2 '+(state==='active'?'stage-active':'');
+        card.innerHTML=`
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-2.5 h-2.5 rounded-full ${state==='completed'?'bg-[var(--cane-600)]':state==='active'?'bg-[var(--cane-400)]':'bg-gray-300'}"></span>
+            <p class="font-semibold text-sm">${s.title}</p>
+          </div>
+          <p class="text-xs text-[var(--cane-800)]">${s.desc}</p>
+          <p class="mt-2 text-xs">${state==='completed'?'Completed':state==='active'?'In Progress':'Upcoming'}</p>
+        `;
+        timelineEl.appendChild(card);
+      });
+    }
+
+    function updateGrowth(){
+      const planted = new Date(plantedInput.value);
+      const now = new Date();
+      const diffDays = Math.max(0, Math.floor((now - planted) / (1000*60*60*24)));
+      daysEl.textContent = diffDays.toString();
+      let current = 'Planting';
+      for(const s of stages){ if(diffDays>=s.start && diffDays < s.end){ current = s.title.split(' ')[0]; break; } if(diffDays>=365){ current='Maturity'; }}
+      stageEl.textContent = current;
+      const estHarvest = new Date(planted.getTime() + 360*24*60*60*1000);
+      harvestEl.textContent = estHarvest.toLocaleDateString()+" 6:00 AM";
+      renderTimeline(diffDays);
+
+      // Bind to new header widgets
+      document.getElementById('uiDays').textContent = diffDays.toString();
+      document.getElementById('uiStage').textContent = current + ' Stage';
+      document.getElementById('uiPlanted').textContent = planted.toLocaleDateString();
+      document.getElementById('uiHarvest').textContent = estHarvest.toLocaleDateString();
+      const remaining = Math.max(0, 360 - diffDays);
+      document.getElementById('uiRemain').textContent = remaining.toString();
+      document.getElementById('uiMonths').textContent = Math.max(0, Math.round(remaining/30)).toString();
+
+      // Timeline progress bar + labels like in image
+      const pct = Math.min(100, Math.round((diffDays/360)*100));
+      document.getElementById('tlBar').style.width = pct + '%';
+      document.getElementById('tlPct').textContent = pct.toString();
+      // Expected/completed dates
+      const germEnd = new Date(planted.getTime() + 30*24*60*60*1000);
+      const tillEnd = new Date(planted.getTime() + 120*24*60*60*1000);
+      const grandEnd = new Date(planted.getTime() + 270*24*60*60*1000);
+      const matEnd = new Date(planted.getTime() + 365*24*60*60*1000);
+      document.getElementById('tlGerm').textContent = (diffDays>=30?'Completed - ':'Expected - ') + germEnd.toLocaleDateString();
+      document.getElementById('tlTill').innerHTML = (diffDays>=120?'Completed - ':'In Progress - ') + `<span id="tlPct">${pct}</span>% Complete`;
+      document.getElementById('tlGrand').textContent = 'Expected - ' + grandEnd.toLocaleDateString();
+      document.getElementById('tlMat').textContent = 'Expected - ' + matEnd.toLocaleDateString();
+    }
+    plantedInput.addEventListener('change', updateGrowth);
+    updateGrowth();
+  </script>
+
+</body>
+</html>
+
+

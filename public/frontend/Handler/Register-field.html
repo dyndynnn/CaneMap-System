@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CaneMap - Field Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cane-50: #f7fee7;
+            --cane-100: #ecfcca;
+            --cane-200: #d8f999;
+            --cane-300: #bbf451;
+            --cane-400: #9ae600;
+            --cane-500: #7ccf00;
+            --cane-600: #5ea500;
+            --cane-700: #497d00;
+            --cane-800: #3c6300;
+            --cane-900: #35530e;
+            --cane-950: #192e03;
+        }
+        
+        /* Darker default text for readability */
+        body { color: var(--cane-900); }
+        h1, h2, h3, h4 { color: var(--cane-950); }
+        p, label, li, span { color: var(--cane-900); }
+
+        .form-input { color: var(--cane-900); }
+        .form-input::placeholder { color: #374151; }
+        .form-input:focus {
+            border-color: var(--cane-500);
+            box-shadow: 0 0 0 3px rgba(124, 207, 0, 0.1);
+        }
+        
+        .form-select { color: var(--cane-900); }
+        .form-select:focus {
+            border-color: var(--cane-500);
+            box-shadow: 0 0 0 3px rgba(124, 207, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--cane-700), var(--cane-800));
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--cane-800), var(--cane-900));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--cane-600), var(--cane-700));
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, var(--cane-700), var(--cane-800));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .section-card {
+            background: linear-gradient(135deg, white, var(--cane-50));
+            border: 1px solid var(--cane-200);
+            transition: all 0.3s ease;
+        }
+        
+        .section-card:hover {
+            box-shadow: 0 8px 25px rgba(94, 165, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--cane-400), var(--cane-500), var(--cane-600));
+        }
+
+.field-header {
+  text-align: left;
+}
+
+</style>
+
+</head>
+<body class="bg-gradient-to-br from-[var(--cane-100)] to-[var(--cane-200)] min-h-screen">
+    <header class="bg-gradient-to-r from-white to-[var(--cane-50)] shadow-lg border-b-2 border-[var(--cane-200)]">
+    <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+       
+        <a href="../Common/lobby.html" class="mr-4 text-[var(--cane-600)] hover:text-[var(--cane-700)] transition-colors">
+            <i class="fas fa-arrow-left text-xl"></i>
+        </a>
+
+        <div class="field-header flex-1 text-left">
+            <h2 class="text-xl font-semibold text-[var(--cane-800)]">Field Registration</h2>
+            <p class="text-sm text-[var(--cane-600)]">Sugarcane Field Registration Form</p>
+        </div>
+
+        </div>
+    </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="bg-white border-b border-[var(--cane-200)]">
+        <div class="container mx-auto px-6 py-3">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-[var(--cane-500)] text-white rounded-full flex items-center justify-center text-sm font-semibold">1</div>
+                    <span class="text-sm font-medium text-[var(--cane-700)]">Field Details</span>
+                </div>
+                <div class="flex-1 h-1 bg-[var(--cane-200)] rounded-full">
+                    <div class="progress-bar h-1 rounded-full" style="width: 25%"></div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-[var(--cane-200)] text-[var(--cane-600)] rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+                    <span class="text-sm font-medium text-[var(--cane-600)]">Documents</span>
+                </div>
+                <div class="flex-1 h-1 bg-[var(--cane-200)] rounded-full"></div>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-[var(--cane-200)] text-[var(--cane-600)] rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+                    <span class="text-sm font-medium text-[var(--cane-600)]">Review</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <div class="max-w-4xl mx-auto">
+            <!-- Form Container -->
+            <form method="POST" enctype="multipart/form-data" class="space-y-8">
+                
+                <!-- Field Information Section -->
+                <div class="section-card rounded-xl p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-lg flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-[var(--cane-900)]">Field Information</h3>
+                            <p class="text-[var(--cane-600)]">Provide basic details about your sugarcane field</p>
+                        </div>
+                    </div>
+                    
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-building text-[var(--cane-500)] mr-2"></i>
+                                Barangay *
+                            </label>
+    <input list="barangay-list" id="barangay" name="barangay" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="Select your barangay...">
+        <datalist id="barangay-list">
+        <option value="Airport">
+        <option value="Alegria">
+        <option value="Alta Vista">
+        <option value="Bagongbong">
+        <option value="Bagong Buhay">
+        <option value="Bantigue">
+        <option value="Batuan">
+        <option value="Bayog">
+        <option value="Biliboy">
+        <option value="Cabaon-an">
+        <option value="Cabintan">
+        <option value="Cabulihan">
+        <option value="Cagbuhangin">
+        <option value="Camp Downes">
+        <option value="Can-adieng">
+        <option value="Can-untog">
+        <option value="Catmon">
+        <option value="Cogon Combado">
+        <option value="Concepcion">
+        <option value="Curva">
+        <option value="Danhug (Lili-on)">
+        <option value="Dayhagan">
+        <option value="Dolores">
+        <option value="Domonar">
+        <option value="Don Carlos B. Rivilla Sr. (Boroc)">
+        <option value="Don Felipe Larrazabal">
+        <option value="Don Potenciano Larrazabal">
+        <option value="Doña Feliza Z. Mejia">
+        <option value="Donghol">
+                                <option value="East (Poblacion)">
+        <option value="Esperanza">
+        <option value="Gaas">
+        <option value="Green Valley">
+        <option value="Guintigui-an">
+        <option value="Hibunawon">
+        <option value="Hugpa">
+        <option value="Ipil">
+        <option value="Juaton">
+        <option value="Kadaohan">
+        <option value="Labrador (Balion)">
+        <option value="Lake Danao">
+        <option value="Lao">
+        <option value="Leondoni">
+        <option value="Libertad">
+        <option value="Liberty">
+        <option value="Licuma">
+        <option value="Liloan">
+        <option value="Linao">
+        <option value="Luna">
+        <option value="Mabato">
+        <option value="Mabini">
+        <option value="Macabug">
+        <option value="Magaswi">
+        <option value="Mahayag">
+        <option value="Mahayahay">
+        <option value="Manlilinao">
+        <option value="Margen">
+        <option value="Mas-in">
+        <option value="Matica-a">
+        <option value="Milagro">
+        <option value="Monterico">
+        <option value="Nasunogan">
+        <option value="Naungan">
+                                <option value="North (Poblacion)">
+        <option value="Nueva Sociedad">
+        <option value="Nueva Vista">
+        <option value="Patag">
+        <option value="Punta">
+        <option value="Quezon, Jr.">
+        <option value="Rufina M. Tan (Rawis)">
+        <option value="Sabang Bao">
+        <option value="Salvacion">
+        <option value="San Antonio">
+        <option value="San Isidro">
+        <option value="San Jose">
+        <option value="San Juan">
+        <option value="San Pablo (Simangan)">
+        <option value="San Vicente">
+        <option value="Santo Niño">
+                                <option value="South (Poblacion)">
+        <option value="Sumangga">
+        <option value="Tambulilid">
+        <option value="Tongonan">
+        <option value="Valencia">
+                                <option value="West (Poblacion)">
+    </datalist>
+</div>
+                        
+<div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-city text-[var(--cane-500)] mr-2"></i>
+                                City/Municipality *
+                            </label>
+    <input type="text" id="city" name="city" value="Ormoc City" readonly
+                                   class="w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg bg-[var(--cane-100)] text-[var(--cane-700)] font-medium">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-mountain text-[var(--cane-500)] mr-2"></i>
+                                Terrain Type *
+                            </label>
+                            <select id="crop_variety" name="crop_variety" required
+                                    class="form-select w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                                <option value="">Select terrain type...</option>
+                                <option value="Flat">Flat - Level ground suitable for mechanization</option>
+                                <option value="Rolling">Rolling - Gentle slopes with moderate elevation changes</option>
+                                <option value="Hilly">Hilly - Steep slopes requiring manual labor</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-ruler-combined text-[var(--cane-500)] mr-2"></i>
+                                Field Size (Hectares)
+                            </label>
+                            <input type="number" id="field_size" name="field_size" step="0.01" min="0.01"
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="e.g., 2.5">
+                        </div>
+                    </div>
+</div>
+
+                <!-- Location Mapping Section -->
+                <div class="section-card rounded-xl p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-lg flex items-center justify-center">
+                            <i class="fas fa-map text-white text-lg"></i>
+                </div>
+                <div>
+                            <h3 class="text-xl font-bold text-[var(--cane-900)]">Field Location</h3>
+                            <p class="text-[var(--cane-600)]">Pin the exact location of your sugarcane field</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 flex items-center justify-between gap-3">
+                        <div class="flex-1">
+                            <input id="rfSearchInput" type="text" placeholder="Search a place or barangay..." class="w-full px-4 py-2 rounded-md bg-white border border-[var(--cane-300)] focus:outline-none focus:ring-2 focus:ring-[var(--cane-400)]/40">
+                        </div>
+                        <button id="rfSearchBtn" type="button" class="px-4 py-2 rounded-md bg-[var(--cane-700)] text-white hover:bg-[var(--cane-800)]">Search</button>
+                    </div>
+                    <div class="mb-6">
+                        <div id="locationMap" class="w-full h-80 rounded-xl border-2 border-[var(--cane-300)] shadow-lg"></div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-latitude text-[var(--cane-500)] mr-2"></i>
+                                Latitude *
+                            </label>
+                            <input type="number" id="latitude" step="any" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="e.g., 11.0064">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                <i class="fas fa-longitude text-[var(--cane-500)] mr-2"></i>
+                                Longitude *
+                            </label>
+                            <input type="number" id="longitude" step="any" required
+                                   class="form-input w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300"
+                                   placeholder="e.g., 124.6075">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-4 bg-[var(--cane-50)] border border-[var(--cane-200)] rounded-lg">
+                        <div class="flex items-start space-x-3">
+                            <i class="fas fa-info-circle text-[var(--cane-600)] mt-1"></i>
+                            <div class="text-sm text-[var(--cane-700)]">
+                                <p class="font-medium mb-1">How to set location:</p>
+                                <ul class="space-y-1">
+                                    <li>• Click on the map above to set your field location</li>
+                                    <li>• Coordinates will automatically update</li>
+                                    <li>• Ensure accuracy for proper field monitoring</li>
+                                </ul>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+
+                <!-- Required Documents Section -->
+                <div class="section-card rounded-xl p-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-500)] to-[var(--cane-600)] rounded-lg flex items-center justify-center">
+                            <i class="fas fa-file-alt text-white text-lg"></i>
+                </div>
+                <div>
+                            <h3 class="text-xl font-bold text-[var(--cane-900)]">Required Documents</h3>
+                            <p class="text-[var(--cane-600)]">Upload necessary documents for verification</p>
+                        </div>
+                </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                        <div>
+                                <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                    <i class="fas fa-certificate text-[var(--cane-500)] mr-2"></i>
+                                    Barangay Certificate *
+                                </label>
+                            <input type="file" id="barangay_certification" name="barangay_certification" accept=".pdf,.jpg,.jpeg,.png" required
+                                       class="w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                                <p class="text-xs text-[var(--cane-600)] mt-2">PDF or image file (max 5MB)</p>
+                        </div>
+                            
+                        <div>
+                                <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                    <i class="fas fa-home text-[var(--cane-500)] mr-2"></i>
+                                    Land Title *
+                                </label>
+                            <input type="file" id="land_title" name="land_title" accept=".pdf,.jpg,.jpeg,.png" required
+                                       class="w-full px-4 py-3 border-2 border-[var(--cane-300)] rounded-lg focus:outline-none transition-all duration-300">
+                                <p class="text-xs text-[var(--cane-600)] mt-2">PDF or image file (max 5MB)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                        <div>
+                                <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                    <i class="fas fa-id-card text-[var(--cane-500)] mr-2"></i>
+                                    Valid ID (Front) *
+                                </label>
+                                <div id="camera-front" class="mb-3"></div>
+                                <button type="button" id="takePhotoFront" class="btn-secondary px-4 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-camera mr-2"></i>Take Photo
+                                </button>
+                            <input type="hidden" id="valid_id_front" name="valid_id_front" required>
+                                <p class="text-xs text-[var(--cane-600)] mt-2">Live photo of your ID front</p>
+                        </div>
+                            
+                        <div>
+                                <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                                    <i class="fas fa-id-card text-[var(--cane-500)] mr-2"></i>
+                                    Valid ID (Back) *
+                                </label>
+                                <div id="camera-back" class="mb-3"></div>
+                                <button type="button" id="takePhotoBack" class="btn-secondary px-4 py-2 rounded-lg font-medium">
+                                    <i class="fas fa-camera mr-2"></i>Take Photo
+                                </button>
+                            <input type="hidden" id="valid_id_back" name="valid_id_back" required>
+                                <p class="text-xs text-[var(--cane-600)] mt-2">Live photo of your ID back</p>
+                        </div>
+                    </div>
+                </div>
+                    
+                    <div class="mt-6">
+                        <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">
+                            <i class="fas fa-user text-[var(--cane-500)] mr-2"></i>
+                            Selfie Holding Your ID *
+                        </label>
+                        <div id="camera-selfie" class="mb-3"></div>
+                        <button type="button" id="takePhotoSelfie" class="btn-secondary px-4 py-2 rounded-lg font-medium">
+                            <i class="fas fa-camera mr-2"></i>Take Selfie
+                        </button>
+                        <input type="hidden" id="selfie_with_id" name="selfie_with_id" required>
+                        <p class="text-xs text-[var(--cane-600)] mt-2">Selfie holding your valid ID for verification</p>
+                    </div>
+                </div>
+
+                <!-- Information Section -->
+                <div class="bg-gradient-to-r from-[var(--cane-50)] to-[var(--cane-100)] border border-[var(--cane-300)] rounded-xl p-6">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-[var(--cane-600)] to-[var(--cane-700)] rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-info text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-[var(--cane-800)] mb-3">What happens after submission?</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <ul class="text-sm text-[var(--cane-700)] space-y-2">
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-check-circle text-[var(--cane-500)] mt-1"></i>
+                                        <span>Your field registration will be reviewed by SRA officers</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-clock text-[var(--cane-500)] mt-1"></i>
+                                        <span>Review process takes 5-10 working days</span>
+                                    </li>
+                                </ul>
+                                <ul class="text-sm text-[var(--cane-700)] space-y-2">
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-map-marked-alt text-[var(--cane-500)] mt-1"></i>
+                                        <span>Once approved, your field will appear on the map</span>
+                                    </li>
+                                    <li class="flex items-start space-x-2">
+                                        <i class="fas fa-users text-[var(--cane-500)] mt-1"></i>
+                                        <span>You can then add workers and submit reports</span>
+                                    </li>
+                    </ul>
+                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Submit -->
+                <div class="space-y-6">
+                    <div class="flex items-start space-x-3 p-4 bg-white border border-[var(--cane-200)] rounded-lg">
+                        <input type="checkbox" id="agree" required class="mt-1 w-5 h-5 text-[var(--cane-600)] border-[var(--cane-300)] rounded focus:ring-[var(--cane-500)]">
+                        <label for="agree" class="text-sm text-[var(--cane-700)]">
+                            I agree to the <a href="#" class="text-[var(--cane-600)] hover:text-[var(--cane-700)] underline">Terms and Conditions</a> and <a href="#" class="text-[var(--cane-600)] hover:text-[var(--cane-700)] underline">Privacy Policy</a> of CaneMap
+                        </label>
+                </div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
+                        <a href="../Common/lobby.html" class="btn-secondary px-8 py-3 rounded-lg font-semibold text-center">
+                            <i class="fas fa-times mr-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn-primary px-8 py-3 rounded-lg font-semibold text-white">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit Field Registration
+                    </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gradient-to-r from-[var(--cane-800)] to-[var(--cane-900)] text-white py-6 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-sm text-[var(--cane-200)]">© 2025 CaneMap. All rights reserved. Developed by the CaneMap Team in collaboration with SRA Ormoc Mill District.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize the location map
+        let locationMap, locationMarker;
+        
+        function initLocationMap() {
+            try {
+                // Initialize map centered on Ormoc City
+                locationMap = L.map('locationMap').setView([11.0064, 124.6075], 12);
+                
+                // Add OpenStreetMap tiles
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(locationMap);
+
+                // Add click event to set location
+                locationMap.on('click', function(e) {
+                    const lat = e.latlng.lat;
+                    const lng = e.latlng.lng;
+                    
+                    // Update coordinates
+                    document.getElementById('latitude').value = lat.toFixed(6);
+                    document.getElementById('longitude').value = lng.toFixed(6);
+                    
+                    // Update marker
+                    if (locationMarker) {
+                        locationMarker.remove();
+                    }
+                    const caneIcon = L.icon({ iconUrl: '../img/PIN.png', iconSize: [40,40], iconAnchor: [20,38], popupAnchor: [0,-32] });
+                    locationMarker = L.marker([lat, lng], { icon: caneIcon })
+                        .addTo(locationMap)
+                        .bindPopup('<b>Field Location</b><br>Click to set new location')
+                        .openPopup();
+                });
+                
+                console.log('Location map initialized successfully');
+                // Wire search (Nominatim)
+                try {
+                    const input = document.getElementById('rfSearchInput');
+                    const btn = document.getElementById('rfSearchBtn');
+                    async function runSearchRF(){
+                        if (!input || !input.value.trim()) return;
+                        const q = encodeURIComponent(input.value.trim());
+                        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${q}`;
+                        const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+                        const results = await res.json();
+                        if (!Array.isArray(results) || results.length === 0) { alert('Place not found.'); return; }
+                        const r = results[0];
+                        const lat = parseFloat(r.lat); const lng = parseFloat(r.lon);
+                        locationMap.setView([lat, lng], 14);
+                        if (locationMarker) locationMarker.remove();
+                        const caneIcon2 = L.icon({ iconUrl: '../img/PIN.png', iconSize: [40,40], iconAnchor: [20,38], popupAnchor: [0,-32] });
+                        locationMarker = L.marker([lat, lng], { icon: caneIcon2 }).addTo(locationMap).bindPopup(r.display_name).openPopup();
+                        document.getElementById('latitude').value = lat.toFixed(6);
+                        document.getElementById('longitude').value = lng.toFixed(6);
+                    }
+                    if (btn) btn.addEventListener('click', function(){ runSearchRF(); });
+                    if (input) input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); runSearchRF(); }});
+                } catch(_) {}
+            } catch (error) {
+                console.error('Error initializing location map:', error);
+                document.getElementById('locationMap').innerHTML = `
+                    <div class="flex items-center justify-center h-full bg-red-50 text-red-600">
+                        <div class="text-center">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                            <p>Error loading map</p>
+                            <p class="text-sm">${error.message}</p>
+        </div>
+    </div>
+                `;
+            }
+        }
+
+        // Initialize map when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                initLocationMap();
+            }, 100);
+        });
+    </script>
+    <!-- Submission Modal -->
+    <div id="submitModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+      <div class="bg-white rounded-xl w-[92%] max-w-xl p-6 shadow-2xl relative">
+        <button id="closeModal" class="absolute top-3 right-4 text-xl">×</button>
+        <div class="space-y-6">
+          <p class="text-lg">Your field registration will be reviewed by the Sugar Regulatory Administration (SRA).</p>
+          <div>
+            <p class="font-semibold mb-2">Status:</p>
+            <div class="bg-gray-300 rounded px-4 py-3 text-lg">Submitted – Awaiting SRA Review (5–10 days)</div>
+          </div>
+          <div class="text-right">
+            <button id="okModal" class="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Intercept form submit to save pending field and show modal
+      (function(){
+        const form = document.querySelector('form');
+        const modal = document.getElementById('submitModal');
+        const okBtn = document.getElementById('okModal');
+        const closeBtn = document.getElementById('closeModal');
+        if (!form) return;
+        form.addEventListener('submit', function(e){
+          e.preventDefault();
+          const barangay = (document.getElementById('barangay')||{}).value || '';
+          const size = (document.getElementById('field_size')||{}).value || '';
+          const terrain = (document.getElementById('crop_variety')||{}).value || '';
+          const lat = parseFloat((document.getElementById('latitude')||{}).value || '0');
+          const lng = parseFloat((document.getElementById('longitude')||{}).value || '0');
+          if (!lat || !lng) {
+            alert('Please set your field location on the map first.');
+            return;
+          }
+          const field = { barangay, size, terrain, lat, lng, status: 'Under Review', createdAt: Date.now() };
+          try {
+            const existing = JSON.parse(localStorage.getItem('pendingFields')||'[]');
+            existing.push(field);
+            localStorage.setItem('pendingFields', JSON.stringify(existing));
+            localStorage.setItem('lastPendingField', JSON.stringify(field));
+          } catch(_) {}
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+        function goLobby(){ window.location.href = '../Common/lobby.html'; }
+        if (okBtn) okBtn.addEventListener('click', goLobby);
+        if (closeBtn) closeBtn.addEventListener('click', goLobby);
+      })();
+    </script>
+    <script src="../../backend/Handler/Register-field.js"></script>
+</body>
+</html>
