@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaneMap - Field Handlers Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Two-tone Green Palette */
+            --primary-dark: #1B5E20;      /* Dark Green for sidebar */
+            --primary-medium: #2E7D32;    /* Medium Dark Green */
+            --primary-light: #A5D6A7;     /* Light Green for highlights/buttons */
+            --primary-lighter: #81C784;   /* Lighter Green alternative */
+            
+            /* Accent Colors */
+            --accent-yellow: #FFD600;     /* Yellow for alerts/highlights */
+            --accent-orange: #FFB74D;     /* Orange alternative */
+            
+            /* Neutral Backgrounds */
+            --neutral-bg: #F8F9FA;        /* Light gray/off-white */
+            --neutral-light: #FFFFFF;     /* Pure white */
+            --neutral-medium: #E9ECEF;    /* Medium gray */
+            
+            /* Text Colors */
+            --text-dark: #212529;         /* Dark text */
+            --text-medium: #495057;       /* Medium text */
+            --text-light: #6C757D;        /* Light text */
+        }
+        .section-card { background: var(--neutral-light); border: 1px solid var(--neutral-medium); }
+        .metric-card { background: var(--neutral-light); border: 1px solid var(--neutral-medium); }
+        .metric-card:hover { box-shadow: 0 4px 15px rgba(27,94,32,.2); transform: translateY(-1px); }
+        .inner-box { background: var(--primary-light); border: 1px solid var(--neutral-medium); }
+        /* Sidebar animation */
+        #sidebar { transition: transform 300ms ease, opacity 300ms ease; }
+        #sidebar.closed { transform: translateX(-100%); opacity: 0; }
+        #hamburger.active .bar1 { transform: translateY(6px) rotate(45deg); }
+        #hamburger.active .bar2 { opacity: 0; }
+        #hamburger.active .bar3 { transform: translateY(-6px) rotate(-45deg); }
+        /* Submenu arrow animation */
+        [id$="-arrow"] { transition: transform 0.3s ease; }
+    </style>
+ </head>
+<body class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <header class="shadow-lg" style="background: linear-gradient(to right, #497d00, #5ea500);">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <button id="hamburger" class="lg:hidden relative w-9 h-9 rounded-md bg-white/20 border border-white/30 flex items-center justify-center group">
+                    <span class="bar1 absolute w-5 h-0.5 bg-white transition-transform"></span>
+                    <span class="bar2 absolute w-5 h-0.5 bg-white transition-opacity"></span>
+                    <span class="bar3 absolute w-5 h-0.5 bg-white transition-transform"></span>
+                </button>
+                <a href="../lobby.html" class="text-white hover:text-gray-200"><i class="fas fa-arrow-left text-xl"></i></a>
+                <h1 class="text-2xl font-bold text-white">CaneMap</h1>
+            </div>
+            <div class="flex items-center space-x-3 text-white">
+                <button class="relative text-white hover:text-gray-200"><i class="fas fa-bell text-lg"></i><span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">5</span></button>
+                
+                <!-- Profile Dropdown -->
+                <div class="relative">
+                    <button id="profileDropdownBtn" class="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors">
+                        <div class="w-7 h-7 bg-gradient-to-br from-[var(--cane-400)] to-[var(--cane-500)] rounded-full flex items-center justify-center shadow-md border border-white/30">
+                            <i class="fas fa-user text-white text-xs"></i>
+                        </div>
+                        <span class="font-medium text-sm">Farmer</span>
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div id="profileDropdown" class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 hidden z-50">
+                        <!-- Red Header Section -->
+                        <div class="bg-green-600 rounded-t-lg p-4 text-center">
+                            <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center shadow-md mx-auto mb-2">
+                                <i class="fas fa-user text-white text-xl"></i>
+                            </div>
+                            <h3 class="text-white font-semibold text-lg">Farmer</h3>
+                        </div>
+                        
+                        <!-- White Content Section -->
+                        <div class="py-2">
+                            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-image w-5 h-5 mr-3 text-gray-500"></i>
+                                <span>Update Photo</span>
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-cog w-5 h-5 mr-3 text-gray-500"></i>
+                                <span>Profile Settings</span>
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-cog w-5 h-5 mr-3 text-gray-500"></i>
+                                <span>Change Password</span>
+                            </a>
+                      
+                        </div>
+                        
+                        <!-- Logout Section -->
+                        <div class="border-t border-gray-200 py-2">
+                            <a href="#" class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 transition-colors">
+                                <i class="fas fa-arrow-right w-5 h-5 mr-3"></i>
+                                <span class="font-medium">Logout</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 min-h-[calc(100vh-60px)] shadow-lg bg-gray-900">
+            <!-- Profile Section -->
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-14 h-14 bg-gradient-to-br from-[var(--cane-400)] to-[var(--cane-500)] rounded-full flex items-center justify-center shadow-md ring-2 ring-white/10">
+                        <i class="fas fa-user text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-semibold text-lg">Farmer</h3>
+                        <p class="text-gray-400 text-sm">Field Handler</p>
+                    </div>
+
+                </div>
+                <div class="flex items-center space-x-2">
+                   
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <nav class="space-y-1">
+                    <!-- Dashboard -->
+                    <div class="mb-4">
+                        <a href="#" class="nav-item flex items-center space-x-3 px-4 py-3 text-white rounded-lg font-medium bg-gray-800" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt w-5 h-5"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    </div>
+
+                    <!-- My Fields -->
+                    <div class="mb-4">
+                        <div class="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors cursor-pointer" onclick="toggleSubmenu('fields')">
+                            <i class="fas fa-map-marked-alt w-5 h-5"></i>
+                            <span>My Fields</span>
+                            <i class="fas fa-chevron-down ml-auto text-xs transition-transform" id="fields-arrow"></i>
+                        </div>
+                        <div id="fields-submenu" class="ml-6 mt-2 space-y-1 hidden">
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors" data-section="fields">Fields</a>
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors" data-section="growth">Growth Tracker</a>
+                        </div>
+                    </div>
+
+                    <!-- Workers -->
+                    <div class="mb-4">
+                        <div class="flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors cursor-pointer" onclick="toggleSubmenu('workers')">
+                        <i class="fas fa-users w-5 h-5"></i>
+                        <span>Workers</span>
+                            <i class="fas fa-chevron-down ml-auto text-xs transition-transform" id="workers-arrow"></i>
+                        </div>
+                        <div id="workers-submenu" class="ml-6 mt-2 space-y-1 hidden">
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors" data-section="workers">Worker List</a>
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700 rounded transition-colors" data-section="approvals">Approvals / Requests</a>
+                        </div>
+                    </div>
+
+                    <!-- Tasks -->
+                    <div class="mb-4">
+                        <a href="#" class="nav-item flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors" data-section="tasks">
+                            <i class="fas fa-list-check w-5 h-5"></i>
+                            <span>Tasks</span>
+                        </a>
+                    </div>
+
+                    <!-- Analytics -->
+                    <div class="mb-4">
+                        <a href="#" class="nav-item flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors" data-section="analytics">
+                            <i class="fas fa-chart-line w-5 h-5"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </div>
+
+                    <!-- Reports -->
+                    <div class="mb-4">
+                    <a href="#" class="nav-item flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors" data-section="reports">
+                        <i class="fas fa-chart-bar w-5 h-5"></i>
+                        <span>Reports</span>
+                    </a>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="mb-4">
+                        <a href="#" class="nav-item flex items-center space-x-3 px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-lg transition-colors" data-section="settings">
+                            <i class="fas fa-cog w-5 h-5"></i>
+                            <span>Settings</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="flex-1 container mx-auto px-4 lg:px-6 py-8">
+        <div id="dashboard" class="content-section">
+        <h2 class="text-3xl font-extrabold mb-6 text-gray-900">Dashboard</h2>
+
+        <!-- Metrics row (Total Fields, Active Workers, Pending Task, Join Request) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="metric-card rounded-xl p-6" style="background-color:#E5F2C7; border-color:#D1E3AC;">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);"><i class="fas fa-map text-xl" style="color: var(--primary-medium);"></i></div>
+                    <div>
+                        <p class="text-sm font-medium" style="color: var(--text-medium);">Total Fields</p>
+                        <p id="mFields" class="text-2xl font-semibold" style="color: var(--text-dark);">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="metric-card rounded-xl p-6" style="background-color:#D9EEDB; border-color:#C2E0C3;">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background: linear-gradient(135deg, var(--primary-light), var(--primary-lighter));"><i class="fas fa-users text-white text-xl"></i></div>
+                    <div>
+                        <p class="text-sm font-medium" style="color: var(--text-medium);">Active Workers</p>
+                        <p id="mWorkers" class="text-2xl font-semibold" style="color: var(--text-dark);">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="metric-card rounded-xl p-6" style="background-color:#FFE4A8; border-color:#F3D27F;">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background: linear-gradient(135deg, var(--accent-orange), #FF9800);"><i class="fas fa-clock text-white text-xl"></i></div>
+                    <div>
+                        <p class="text-sm font-medium" style="color: var(--text-medium);">Pending Task</p>
+                        <p id="mTasks" class="text-2xl font-semibold" style="color: var(--text-dark);">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="metric-card rounded-xl p-6" style="background-color:#D6EAFB; border-color:#BFD9F4;">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB);"><i class="fas fa-user-plus text-xl" style="color: #1976D2;"></i></div>
+                    <div>
+                        <p class="text-sm font-medium" style="color: var(--text-medium);">Join Request</p>
+                        <p id="mRequests" class="text-2xl font-semibold" style="color: var(--text-dark);">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Panel Section (replaces dashboard when selected) -->
+        <div id="task-panel" class="content-section hidden">
+            <h2 class="text-2xl font-bold text-[var(--cane-900)] mb-6">Task Assignment Form</h2>
+            <div class="section-card rounded-xl p-6">
+                <form id="taskForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">Task Title:</label>
+                            <input type="text" placeholder="Enter task title" class="w-full px-3 py-2 border-2 border-[var(--cane-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] text-[var(--cane-900)]"/>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">Select Field:</label>
+                            <select class="w-full px-3 py-2 border-2 border-[var(--cane-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] text-[var(--cane-900)]">
+                                <option>Lot A1 - Naungan</option>
+                                <option>Lot B2 - Ipil</option>
+                                <option>Lot C3 - Linao</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">Assigned Date:</label>
+                            <div class="relative">
+                                <input type="date" class="w-full px-3 py-2 pr-10 border-2 border-[var(--cane-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] text-[var(--cane-900)]"/>
+                                <i class="fas fa-calendar-alt absolute right-3 top-2.5 text-gray-500"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">Assigned Time:</label>
+                            <input type="time" class="w-full px-3 py-2 border-2 border-[var(--cane-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] text-[var(--cane-900)]"/>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">Assigned to:</label>
+                        <div class="flex items-center space-x-2 mb-2 text-[var(--cane-800)]">
+                            <input type="checkbox" class="w-4 h-4 border-gray-300 rounded">
+                            <span class="text-sm">Show only workers with Driver Badge</span>
+                        </div>
+                        <select class="w-full px-3 py-2 border-2 border-[var(--cane-200)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] text-[var(--cane-900)]">
+                            <option>Select worker…</option>
+                            <option>Maria Sanchez</option>
+                            <option>Peter Romero (Driver)</option>
+                            <option>Anna Reyes</option>
+                            <option>Carl Ramos (Driver)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-[var(--cane-800)] mb-2">Task Description:</label>
+                        <textarea rows="6" class="w-full px-3 py-2 border-2 border-[var(--cane-200)] rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-[var(--cane-500)] focus:border-[var(--cane-500)] text-[var(--cane-900)]" placeholder="Add details, instructions, tools, etc."></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3">
+                        <button type="button" class="px-5 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-5 py-2 rounded-lg text-white bg-[var(--cane-700)] hover:bg-[var(--cane-800)] shadow">Assign Task</button>
+                    </div>
+                </form>
+            </div>
+            <div class="mt-6 section-card rounded-xl p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-[var(--cane-900)]">My Tasks</h3>
+                <button id="btnRefreshTasks" class="px-3 py-1.5 rounded bg-[var(--cane-700)] hover:bg-[var(--cane-800)] text-white text-sm"><i class="fas fa-rotate mr-2"></i>Refresh</button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead>
+                    <tr class="text-left text-[var(--cane-800)]">
+                      <th class="py-2 pr-2">Title</th>
+                      <th class="py-2 pr-2">Field</th>
+                      <th class="py-2 pr-2">Assigned</th>
+                      <th class="py-2 pr-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tasksTbody"></tbody>
+                </table>
+              </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Join Request panel -->
+            <div class="section-card rounded-xl p-6">
+                <div class="mb-4 p-3 rounded-lg" style="background-color: #E8F5E9;">
+                    <h3 class="text-lg font-bold flex items-center" style="color: var(--text-dark);"><i class="fas fa-user-plus mr-3" style="color: var(--primary-medium);"></i>Join Request</h3>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-start justify-between bg-white border rounded-lg p-4 shadow-sm" style="border-color: var(--neutral-medium);">
+                            <div class="flex items-start space-x-3">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background: linear-gradient(135deg, var(--primary-medium), var(--primary-light));"><i class="fas fa-user"></i></div>
+                                <div>
+                                <p class="font-semibold leading-tight" style="color: var(--text-dark);">Maria Sanchez</p>
+                                <p class="text-xs" style="color: var(--text-medium);">Requesting to join: Lot A1 - Naungan</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 text-xs rounded text-white hover:opacity-90 transition-opacity" style="background-color: #43A047;">Approve</button>
+                            <button class="px-3 py-1 text-xs rounded text-white hover:opacity-90 transition-opacity" style="background-color: #E53935;">Decline</button>
+                                </div>
+                            </div>
+
+                    <div class="flex items-start justify-between bg-white border rounded-lg p-4 shadow-sm" style="border-color: var(--neutral-medium);">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-9 h-9 rounded-full flex items-center justify-center text-white" style="background: linear-gradient(135deg, var(--primary-medium), var(--primary-light));"><i class="fas fa-user"></i></div>
+                            <div>
+                                <p class="font-semibold leading-tight" style="color: var(--text-dark);">Peter Romero</p>
+                                <p class="text-xs" style="color: var(--text-medium);">Requesting to join: Lot B2 - Ipil</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button class="px-3 py-1 text-xs rounded text-white hover:opacity-90 transition-opacity" style="background-color: #43A047;">Approve</button>
+                            <button class="px-3 py-1 text-xs rounded text-white hover:opacity-90 transition-opacity" style="background-color: #E53935;">Decline</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Logs panel -->
+            <div class="section-card rounded-xl p-6">
+                <h3 class="text-lg font-bold mb-4 flex items-center" style="color: var(--text-dark);"><i class="fas fa-stream mr-3" style="color: var(--primary-medium);"></i>Recent Activity Logs</h3>
+                <div class="space-y-4">
+                    <div class="bg-white border rounded-lg p-4 flex items-start justify-between shadow-sm" style="border-color: var(--neutral-medium);">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: var(--neutral-medium);"><i class="fas fa-user" style="color: var(--text-medium);"></i></div>
+                            <div>
+                                <p class="font-semibold" style="color: var(--text-dark);">Anna Reyes</p>
+                                <p class="text-sm leading-tight" style="color: var(--text-medium);">Fertilization Task - Lot A1<br/>Applied organic fertilizer to section A. Weather conditions favorable.</p>
+                                <div class="mt-2 flex items-center space-x-4 text-sm">
+                                    <button class="hover:underline" style="color: var(--text-medium);"><i class="fas fa-image mr-1"></i>View Photos</button>
+                                    <button class="hover:underline" style="color: var(--text-medium);"><i class="fas fa-comment mr-1"></i>Add Comment</button>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded" style="background-color: #E8F5E9; color: var(--primary-medium);">Completed</span>
+                    </div>
+
+                    <div class="bg-white border rounded-lg p-4 flex items-start justify-between shadow-sm" style="border-color: var(--neutral-medium);">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background-color: var(--neutral-medium);"><i class="fas fa-user" style="color: var(--text-medium);"></i></div>
+                            <div>
+                                <p class="font-semibold" style="color: var(--text-dark);">Carl Ramos</p>
+                                <p class="text-sm leading-tight" style="color: var(--text-medium);">Weeding Task - Lot B2<br/>Started weeding in section B. Approximately 60% completed.</p>
+                                <div class="mt-2 flex items-center space-x-4 text-sm">
+                                    <button class="hover:underline" style="color: var(--text-medium);"><i class="fas fa-image mr-1"></i>View Photos</button>
+                                    <button class="hover:underline" style="color: var(--text-medium);"><i class="fas fa-comment mr-1"></i>Add Comment</button>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded" style="background-color: #FFF3E0; color: #F57C00;">In Progress</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Embedded sections -->
+        <div id="reports" class="content-section hidden">
+          <div class="section-card rounded-xl p-6">
+            <div id="reports-list">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-[var(--cane-900)]">Submitted Reports</h3>
+                <button id="btn-open-report-form" class="px-4 py-2 rounded-lg text-white bg-[var(--cane-700)] hover:bg-[var(--cane-800)] shadow"><i class="fas fa-plus mr-2"></i>Submit Report</button>
+              </div>
+              <div class="inner-box rounded-lg overflow-hidden">
+                <div class="p-3 border-b border-[var(--cane-200)] bg-[var(--cane-100)] flex text-sm font-semibold">
+                  <div class="w-1/4">Date</div>
+                  <div class="w-1/4">Field</div>
+                  <div class="w-1/4">Report Type</div>
+                  <div class="w-1/4 text-right">Status</div>
+                </div>
+                <div id="reports-rows" class="divide-y divide-[var(--cane-200)]">
+                  <!-- rows injected by JS -->
+                </div>
+              </div>
+            </div>
+            <div id="reports-form" class="hidden">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-lg font-bold text-[var(--cane-900)]">Submit Report</h3>
+                <button id="btn-back-to-list" class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800"><i class="fas fa-arrow-left mr-2"></i>Back to List</button>
+              </div>
+              <div class="rounded-xl overflow-hidden border border-[var(--cane-200)]">
+                <iframe src="Report.html" class="w-full h-[1600px]" loading="lazy"></iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="growth" class="content-section hidden">
+          <div class="section-card rounded-xl overflow-hidden">
+            <iframe src="GrowthTracker.html" class="w-full h-[1600px]" loading="lazy"></iframe>
+          </div>
+        </div>
+
+        <!-- Fields embedded section -->
+        <div id="fields" class="content-section hidden">
+          <div class="section-card rounded-xl overflow-hidden">
+            <iframe src="Fields.html" class="w-full h-[800px]" loading="lazy"></iframe>
+          </div>
+        </div>
+
+        <!-- Workers Section -->
+        <div id="workers" class="content-section hidden">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div class="section-card rounded-xl p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h2 class="font-bold text-[var(--cane-950)]">Farmers</h2>
+                <div class="flex items-center gap-2">
+                  <input id="searchFarmers" type="text" placeholder="Search farmers..." class="px-3 py-1.5 border rounded-md text-sm border-[var(--cane-300)]" />
+                  <button id="addFarmer" class="px-3 py-1.5 rounded-md text-sm text-white bg-[var(--cane-700)] hover:bg-[var(--cane-800)]">+ Add</button>
+                </div>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead>
+                    <tr class="text-left text-[var(--cane-800)]">
+                      <th class="py-2 pr-2">Name</th>
+                      <th class="py-2 pr-2">Barangay</th>
+                      <th class="py-2 pr-2">Phone</th>
+                      <th class="py-2 pr-2">Since</th>
+                      <th class="py-2 pr-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="farmersTbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div class="section-card rounded-xl p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h2 class="font-bold text-[var(--cane-950)]">Drivers</h2>
+                <div class="flex items-center gap-2">
+                  <input id="searchDrivers" type="text" placeholder="Search drivers..." class="px-3 py-1.5 border rounded-md text-sm border-[var(--cane-300)]" />
+                  <button id="addDriver" class="px-3 py-1.5 rounded-md text-sm text-white bg-[var(--cane-700)] hover:bg-[var(--cane-800)]">+ Add</button>
+                </div>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                  <thead>
+                    <tr class="text-left text-[var(--cane-800)]">
+                      <th class="py-2 pr-2">Name</th>
+                      <th class="py-2 pr-2">Plate No.</th>
+                      <th class="py-2 pr-2">Phone</th>
+                      <th class="py-2 pr-2">Since</th>
+                      <th class="py-2 pr-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="driversTbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="section-card rounded-xl p-4">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="font-bold text-[var(--cane-950)]">Join Requests</h2>
+              <span id="requestsCount" class="px-2 py-1 rounded-full text-xs bg-[var(--cane-100)] border border-[var(--cane-200)] text-[var(--cane-900)]">0 pending</span>
+            </div>
+            <div id="requestsList" class="space-y-2"></div>
+          </div>
+          <template id="requestItemTpl">
+            <div class="flex items-center justify-between p-3 rounded-lg border border-[var(--cane-200)] bg-white">
+              <div>
+                <p class="font-semibold text-[var(--cane-950)]"><span data-field="name"></span> <span class="px-2 py-0.5 rounded-full text-xs ml-2 bg-[var(--cane-100)] border border-[var(--cane-200)] text-[var(--cane-900)]" data-field="role"></span></p>
+                <p class="text-sm text-[var(--cane-800)]"><span data-field="barangay"></span> • <span data-field="phone"></span></p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1.5 rounded-md bg-green-600 hover:bg-green-700 text-white text-sm" data-action="approve">Approve</button>
+                <button class="px-3 py-1.5 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm" data-action="reject">Reject</button>
+              </div>
+            </div>
+          </template>
+          <script type="module" src="../../backend/Handler/worker.js"></script>
+        </div>
+        </main>
+    </div>
+
+    <script>
+      // Submenu toggle functionality
+      function toggleSubmenu(menuId) {
+        const submenu = document.getElementById(menuId + '-submenu');
+        const arrow = document.getElementById(menuId + '-arrow');
+        
+        if (submenu && arrow) {
+          const isHidden = submenu.classList.contains('hidden');
+          
+          // Close all other submenus
+          document.querySelectorAll('[id$="-submenu"]').forEach(menu => {
+            if (menu.id !== menuId + '-submenu') {
+              menu.classList.add('hidden');
+            }
+          });
+          
+          // Reset all arrows
+          document.querySelectorAll('[id$="-arrow"]').forEach(arr => {
+            if (arr.id !== menuId + '-arrow') {
+              arr.style.transform = 'rotate(0deg)';
+            }
+          });
+          
+          // Toggle current submenu
+          if (isHidden) {
+            submenu.classList.remove('hidden');
+            arrow.style.transform = 'rotate(180deg)';
+          } else {
+            submenu.classList.add('hidden');
+            arrow.style.transform = 'rotate(0deg)';
+          }
+        }
+      }
+
+      // SPA-style section switcher
+      function showSection(sectionId) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+        const el = document.getElementById(sectionId);
+        if (el) el.classList.remove('hidden');
+        // active nav styling
+        document.querySelectorAll('.nav-item').forEach(a => {
+          a.classList.remove('text-white', 'bg-gray-800');
+          a.classList.add('text-gray-300');
+        });
+        const active = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
+        if (active) {
+          active.classList.remove('text-gray-300');
+          active.classList.add('text-white', 'bg-gray-800');
+        }
+      }
+      // Handle main nav items and submenu items
+      document.querySelectorAll('.nav-item, [data-section]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          const section = a.getAttribute('data-section');
+          if (section) {
+            e.preventDefault();
+            showSection(section);
+          }
+        });
+      });
+
+      // Hamburger toggle for sidebar
+      const sidebar = document.getElementById('sidebar');
+      const hamburger = document.getElementById('hamburger');
+      if (hamburger && sidebar) {
+        // initialize bars vertical positions
+        const bars = hamburger.querySelectorAll('span');
+        if (bars[0]) bars[0].style.top = '8px';
+        if (bars[1]) bars[1].style.top = '14px';
+        if (bars[2]) bars[2].style.top = '20px';
+        // set initial state: desktop open, mobile closed
+        function setInitial(){
+          if (window.innerWidth >= 1024) { sidebar.classList.remove('closed'); }
+          else { sidebar.classList.add('closed'); }
+        }
+        setInitial();
+        window.addEventListener('resize', setInitial);
+        hamburger.addEventListener('click', () => {
+          sidebar.classList.toggle('closed');
+          hamburger.classList.toggle('active');
+        });
+      }
+
+      // Dynamic metrics
+      function updateMetrics(){
+        try{
+          const fields = JSON.parse(localStorage.getItem('pendingFields')||'[]');
+          const farmers = JSON.parse(localStorage.getItem('cm_farmers')||'[]');
+          const drivers = JSON.parse(localStorage.getItem('cm_drivers')||'[]');
+          const requests = JSON.parse(localStorage.getItem('cm_worker_requests')||'[]');
+          const tasks = JSON.parse(localStorage.getItem('cm_tasks')||'[]');
+          const el = id=>document.getElementById(id);
+          if (el('mFields')) el('mFields').textContent = fields.length;
+          if (el('mWorkers')) el('mWorkers').textContent = farmers.length + drivers.length;
+          if (el('mRequests')) el('mRequests').textContent = requests.length;
+          if (el('mTasks')) el('mTasks').textContent = (tasks.filter(t=> (t.status||'Pending')==='Pending')).length;
+        }catch(_){ }
+      }
+      updateMetrics();
+      setInterval(updateMetrics, 4000);
+
+      // Tasks list
+      async function refreshTasks(){
+        try{
+          const mod = await import('../../backend/Handler/tasks.js');
+          const list = await mod.fetchTasks();
+          const tbody = document.getElementById('tasksTbody');
+          if (!tbody) return;
+          tbody.innerHTML = (list||[]).map(t=>`
+            <tr class="border-t border-[var(--cane-100)]">
+              <td class="py-2 pr-2 font-semibold text-[var(--cane-950)]">${t.title||'Untitled'}</td>
+              <td class="py-2 pr-2">${t.field||''}</td>
+              <td class="py-2 pr-2">${t.assignedAt ? new Date(t.assignedAt).toLocaleString() : ''}</td>
+              <td class="py-2 pr-2"><span class="px-2 py-1 text-xs rounded ${((t.status||'Pending')==='Completed')?'bg-green-100 text-green-800':((t.status||'Pending')==='In Progress')?'bg-blue-100 text-blue-800':'bg-yellow-100 text-yellow-800'}">${t.status||'Pending'}</span></td>
+            </tr>
+          `).join('') || '<tr><td colspan="4" class="py-3 text-sm text-[var(--cane-700)]">No tasks yet.</td></tr>';
+          // mirror to local for metrics fallback
+          localStorage.setItem('cm_tasks', JSON.stringify(list||[]));
+          updateMetrics();
+        }catch(_){ }
+      }
+      const btnRefreshTasks = document.getElementById('btnRefreshTasks');
+      if (btnRefreshTasks) btnRefreshTasks.addEventListener('click', refreshTasks);
+      // initial tasks load on page open
+      refreshTasks();
+
+      // Seed demo report rows and wire up toggle between list and form
+      const reports = [
+        {date:'2025-02-12', field:'Lot A1 - Naungan', type:'Production', status:'Approved'},
+        {date:'2025-03-08', field:'Lot B2 - Ipil', type:'Cost of Production', status:'Pending'},
+        {date:'2025-04-20', field:'Lot C3 - Linao', type:'Harvest', status:'Submitted'}
+      ];
+      const rows = document.getElementById('reports-rows');
+      if (rows) {
+        reports.forEach(r => {
+          const el = document.createElement('div');
+          el.className = 'p-3 flex text-sm';
+          el.innerHTML = `
+            <div class="w-1/4">${new Date(r.date).toLocaleDateString()}</div>
+            <div class="W-1/4">${r.field}</div>
+            <div class="w-1/4">${r.type}</div>
+            <div class="w-1/4 text-right"><span class="px-2 py-1 text-xs rounded ${r.status==='Approved'?'bg-green-100 text-green-800':r.status==='Pending'?'bg-yellow-100 text-yellow-800':'bg-blue-100 text-blue-800'}">${r.status}</span></div>
+          `;
+          rows.appendChild(el);
+        });
+      }
+      const btnOpen = document.getElementById('btn-open-report-form');
+      const btnBack = document.getElementById('btn-back-to-list');
+      const listWrap = document.getElementById('reports-list');
+      const formWrap = document.getElementById('reports-form');
+      if (btnOpen && btnBack) {
+        btnOpen.addEventListener('click', ()=>{ listWrap.classList.add('hidden'); formWrap.classList.remove('hidden'); });
+        btnBack.addEventListener('click', ()=>{ formWrap.classList.add('hidden'); listWrap.classList.remove('hidden'); window.scrollTo({top:0, behavior:'smooth'}); });
+      }
+
+      // Profile dropdown functionality
+      const profileDropdownBtn = document.getElementById('profileDropdownBtn');
+      const profileDropdown = document.getElementById('profileDropdown');
+      
+      if (profileDropdownBtn && profileDropdown) {
+        // Toggle dropdown on button click
+        profileDropdownBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          profileDropdown.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!profileDropdownBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+            profileDropdown.classList.add('hidden');
+          }
+        });
+        
+        // Close dropdown when pressing Escape key
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            profileDropdown.classList.add('hidden');
+          }
+        });
+      }
+    </script>
+
+</body>
+</html>
+
+
